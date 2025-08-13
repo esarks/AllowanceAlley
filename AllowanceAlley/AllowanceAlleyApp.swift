@@ -1,32 +1,13 @@
-//
-//  AllowanceAlleyApp.swift
-//  AllowanceAlley
-//
-//  Created by Paul Marshall on 8/12/25.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct AllowanceAlleyApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    @StateObject private var familyStore = FamilyStore()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(familyStore)
         }
-        .modelContainer(sharedModelContainer)
     }
 }
