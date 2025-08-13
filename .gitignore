@@ -1,0 +1,19 @@
+# Xcode build artifacts
+DerivedData/
+build/
+*.moved-aside
+*.ipa
+
+# Xcode user-specific files
+**/*.xcworkspace/xcuserdata/
+**/*.xcodeproj/xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+
+# SwiftPM
+.swiftpm/
+.build/
+
+# macOS
+.DS_Store
