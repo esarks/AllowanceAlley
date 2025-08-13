@@ -17,3 +17,18 @@ build/
 
 # macOS
 .DS_Store
+
+# Xcode user settings
+*.xcuserdata/
+*.xcuserstate
+
+# Build products
+DerivedData/
+build/
+
+# Supabase config
+SupabaseConfig.swift
+Config.xconfig
+
+# macOS metadata
+.DS_Store
