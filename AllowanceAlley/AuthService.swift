@@ -1,33 +1,44 @@
+import Foundation
 import Supabase
-import Observation
+import Combine
 
-@Observable final class AuthService {
+@MainActor
+final class AuthService: ObservableObject {
     static let shared = AuthService()
     private init() {}
 
     private let client = SupabaseManager.shared.client
-    var session: Session?
 
-    @MainActor
+    @Published var isSignedIn: Bool = false
+
     func loadSession() async {
-        session = try? await client.auth.session
+        // if a session exists, you're signed in
+        isSignedIn = (try? await client.auth.session) != nil
     }
 
-    @MainActor
     func signIn(email: String, password: String) async throws {
-        let (s, _) = try await client.auth.signIn(email: email, password: password)
-        session = s
+        // OLD:
+        // let response = try await client.auth.signIn(email: email, password: password)
+        // isSignedIn = (response.session != nil)
+
+        // NEW:
+        try await client.auth.signIn(email: email, password: password)
+        isSignedIn = (try? await client.auth.session) != nil
     }
 
-    @MainActor
     func signUp(email: String, password: String) async throws {
-        let (s, _) = try await client.auth.signUp(email: email, password: password)
-        session = s
+        // OLD:
+        // let response = try await client.auth.signUp(email: email, password: password)
+        // isSignedIn = (response.session != nil)
+
+        // NEW:
+        try await client.auth.signUp(email: email, password: password)
+        isSignedIn = (try? await client.auth.session) != nil
     }
 
-    @MainActor
+
     func signOut() async throws {
         try await client.auth.signOut()
-        session = nil
+        isSignedIn = false
     }
 }

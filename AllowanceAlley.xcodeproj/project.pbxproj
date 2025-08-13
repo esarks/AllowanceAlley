@@ -106,6 +106,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				600B4F852E4D1DEC001902DC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				600B4EF52E4C1932001902DC /* AllowanceAlley */,
@@ -268,6 +269,10 @@
 			isa = PBXTargetDependency;
 			target = 600B4EF22E4C1932001902DC /* AllowanceAlley */;
 			targetProxy = 600B4F0D2E4C1933001902DC /* PBXContainerItemProxy */;
+		};
+		600B4F852E4D1DEC001902DC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = 600B4F842E4D1DEC001902DC /* Supabase */;
 		};
 /* End PBXTargetDependency section */
 
@@ -564,6 +569,14 @@
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		600B4F842E4D1DEC001902DC /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 600B4F4D2E4CF2AE001902DC /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 600B4EEB2E4C1932001902DC /* Project object */;
 }

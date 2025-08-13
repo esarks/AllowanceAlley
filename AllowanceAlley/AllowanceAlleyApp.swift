@@ -1,26 +1,28 @@
 import SwiftUI
+import Supabase
 
 @main
 struct AllowanceAlleyApp: App {
-    @State private var auth = AuthService.shared
+    @StateObject private var auth = AuthService.shared
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .task { await auth.loadSession() }
-                .environment(auth)
+                .environmentObject(auth)
         }
     }
 }
 
 struct RootView: View {
-    @Environment(AuthService.self) private var auth
+    @EnvironmentObject private var auth: AuthService
+
     var body: some View {
         Group {
-            if auth.session == nil {
-                SignInView()
-            } else {
+            if auth.isSignedIn {
                 FamilyHomeView()
+            } else {
+                SignInView()
             }
         }
     }
