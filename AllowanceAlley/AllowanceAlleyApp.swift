@@ -1,3 +1,4 @@
+
 import SwiftUI
 
 @main
@@ -6,9 +7,10 @@ struct AllowanceAlleyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            FamilyHomeView()
+            RootView()
                 .environmentObject(auth)
                 .onOpenURL { url in
+                    // Handle allowancealley://auth-callback
                     Task { await auth.handleOpenURL(url) }
                 }
         }
