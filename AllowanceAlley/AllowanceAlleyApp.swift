@@ -3,26 +3,22 @@ import Supabase
 
 @main
 struct AllowanceAlleyApp: App {
-    @StateObject private var auth = AuthService.shared
+    private let client = SupabaseManager.shared.client
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .task { await auth.loadSession() }
-                .environmentObject(auth)
-        }
-    }
-}
-
-struct RootView: View {
-    @EnvironmentObject private var auth: AuthService
-    var body: some View {
-        Group {
-            if auth.isSignedIn {
-                FamilyHomeView()
-            } else {
-                SignInView()
-            }
+            ContentView()
+                .onOpenURL { url in
+                    print("🔗 onOpenURL received: \(url.absoluteString)")
+                    Task {
+                        do {
+                            try await client.auth.session(from: url)
+                            print("✅ Supabase session restored from redirect")
+                        } catch {
+                            print("❌ Failed to restore session from redirect:", error.localizedDescription)
+                        }
+                    }
+                }
         }
     }
 }
