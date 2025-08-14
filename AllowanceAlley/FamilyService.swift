@@ -13,7 +13,7 @@ struct MemberDTO: Codable, Identifiable {
 struct FamilyDTO: Codable, Identifiable {
     let id: UUID
     let name: String?
-    let owner_id: UUID         // ← if your DB column is TEXT, change to String
+    let owner_id: UUID          // change to String if your DB column is TEXT
 }
 
 private struct NewFamily: Codable {
@@ -23,7 +23,8 @@ private struct NewFamily: Codable {
 }
 
 final class FamilyService {
-    private let db = SupabaseManager.shared.client.database   // deprecation warning ok
+    // Your installed SDK exposes `database` (deprecation warning is OK)
+    private let db = SupabaseManager.shared.client.database
     private let auth = SupabaseManager.shared.client.auth
 
     func getOrCreateMyFamily(named name: String = "My Family") async throws -> UUID {
@@ -31,7 +32,7 @@ final class FamilyService {
             throw NSError(domain: "Auth", code: 401,
                           userInfo: [NSLocalizedDescriptionKey: "No active session"])
         }
-        let ownerID: UUID = session.user.id // if TEXT column, use: let ownerID = session.user.id
+        let ownerID: UUID = session.user.id   // if TEXT column, use: let ownerID = session.user.id
 
         if let existing = try? await fetchOwnedFamily(ownerID: ownerID) {
             return existing.id
@@ -44,7 +45,7 @@ final class FamilyService {
         let resp: PostgrestResponse<FamilyDTO> = try await db
             .from("families")
             .select()
-            .eq("owner_id", value: ownerID) // if TEXT column, this is String
+            .eq("owner_id", value: ownerID)
             .limit(1)
             .single()
             .execute()
@@ -54,7 +55,7 @@ final class FamilyService {
     private func insertFamily(ownerID: UUID, name: String) async throws -> FamilyDTO {
         let new = NewFamily(id: UUID(), name: name, owner_id: ownerID)
 
-        _ = try await db.from("families").insert(new).execute() // simple insert
+        _ = try await db.from("families").insert(new).execute()
 
         let resp: PostgrestResponse<FamilyDTO> = try await db
             .from("families")

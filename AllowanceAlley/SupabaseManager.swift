@@ -1,28 +1,24 @@
-import SwiftUI
+import Foundation
 import Supabase
 
-@main
-struct AllowanceAlleyApp: App {
-    @StateObject private var auth = AuthService.shared
-
-    var body: some Scene {
-        WindowGroup {
-            RootView()
-                .task { await auth.loadSession() }
-                .environmentObject(auth)
-        }
+enum AppConfig {
+    static var url: URL {
+        let s = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String
+        return URL(string: s ?? ProcessInfo.processInfo.environment["SUPABASE_URL"]!)!
+    }
+    static var anonKey: String {
+        Bundle.main.object(forInfoDictionaryKey: "SUPABASE_ANON_KEY") as? String
+        ?? ProcessInfo.processInfo.environment["SUPABASE_ANON_KEY"]!
     }
 }
 
-struct RootView: View {
-    @EnvironmentObject private var auth: AuthService
-    var body: some View {
-        Group {
-            if auth.isSignedIn {
-                FamilyHomeView()
-            } else {
-                SignInView()
-            }
-        }
+final class SupabaseManager {
+    static let shared = SupabaseManager()
+    let client: SupabaseClient
+    private init() {
+        client = SupabaseClient(
+            supabaseURL: AppConfig.url,
+            supabaseKey: AppConfig.anonKey
+        )
     }
 }

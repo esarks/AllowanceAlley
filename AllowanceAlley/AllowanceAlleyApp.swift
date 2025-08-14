@@ -16,7 +16,6 @@ struct AllowanceAlleyApp: App {
 
 struct RootView: View {
     @EnvironmentObject private var auth: AuthService
-
     var body: some View {
         Group {
             if auth.isSignedIn {
