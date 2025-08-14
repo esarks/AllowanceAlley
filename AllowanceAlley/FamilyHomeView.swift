@@ -1,18 +1,20 @@
 import SwiftUI
 
 struct FamilyHomeView: View {
-    @Environment(AuthService.self) private var auth
+    @EnvironmentObject private var auth: AuthService
     private let service = FamilyService()
 
     @State private var familyId: UUID?
     @State private var members: [MemberDTO] = []
     @State private var showAddChild = false
-    @State private var error: String?
+    @State private var errorMessage: String?   // ← rename
 
     var body: some View {
         NavigationStack {
             List {
-                if let error { Text(error).foregroundStyle(.red) }
+                if let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
+                }
                 Section("Children") {
                     ForEach(members.filter { $0.role == "child" }) { m in
                         HStack {
@@ -34,12 +36,12 @@ struct FamilyHomeView: View {
                     Button { showAddChild = true } label: { Label("Add", systemImage: "plus") }
                 }
             }
-            .task {
-                await load()
-            }
+            .task { await load() }
             .refreshable { await load() }
             .sheet(isPresented: $showAddChild) {
-                AddChildSheet(familyId: familyId, onAdded: { await load() })
+                AddChildSheet(familyId: familyId) {
+                    await load()     // refresh after adding
+                }
             }
         }
     }
@@ -49,10 +51,10 @@ struct FamilyHomeView: View {
         do {
             let id = try await service.getOrCreateMyFamily()
             familyId = id
-            members = try await service.members(familyId: id)
-            error = nil
+            members = try await service.getMembers(familyId: id)  // ← new call
+            errorMessage = nil
         } catch {
-            error = error.localizedDescription
+            errorMessage = error.localizedDescription            // ← fix immutable error
         }
     }
 }
@@ -77,20 +79,15 @@ struct AddChildSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         Task {
-                            guard let familyId else { return }
-                            try? await FamilyService().addChild(
-                                familyId: familyId,
-                                name: name,
-                                age: Int(age)
-                            )
+                            guard let familyId, !name.isEmpty else { return }
+                            let intAge = Int(age)
+                            try? await FamilyService().addChild(familyId: familyId, name: name, age: intAge)
                             await onAdded()
                             dismiss()
                         }
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty || familyId == nil)
                 }
             }
         }
     }
 }
-
