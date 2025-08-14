@@ -7,7 +7,7 @@ struct FamilyHomeView: View {
     @State private var familyId: UUID?
     @State private var members: [MemberDTO] = []
     @State private var showAddChild = false
-    @State private var errorMessage: String?   // ← rename
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -28,9 +28,7 @@ struct FamilyHomeView: View {
             .navigationTitle("Family")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Sign Out") {
-                        Task { try? await auth.signOut() }
-                    }
+                    Button("Sign Out") { Task { try? await auth.signOut() } }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showAddChild = true } label: { Label("Add", systemImage: "plus") }
@@ -39,8 +37,8 @@ struct FamilyHomeView: View {
             .task { await load() }
             .refreshable { await load() }
             .sheet(isPresented: $showAddChild) {
-                AddChildSheet(familyId: familyId) {
-                    await load()     // refresh after adding
+                AddChildSheet(familyId: familyId, service: service) {
+                    await load()
                 }
             }
         }
@@ -51,16 +49,17 @@ struct FamilyHomeView: View {
         do {
             let id = try await service.getOrCreateMyFamily()
             familyId = id
-            members = try await service.getMembers(familyId: id)  // ← new call
+            members = try await service.getMembers(familyId: id)
             errorMessage = nil
         } catch {
-            errorMessage = error.localizedDescription            // ← fix immutable error
+            errorMessage = error.localizedDescription
         }
     }
 }
 
 struct AddChildSheet: View {
     let familyId: UUID?
+    let service: FamilyService
     var onAdded: @Sendable () async -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -81,7 +80,7 @@ struct AddChildSheet: View {
                         Task {
                             guard let familyId, !name.isEmpty else { return }
                             let intAge = Int(age)
-                            try? await FamilyService().addChild(familyId: familyId, name: name, age: intAge)
+                            try? await service.addChild(familyId: familyId, name: name, age: intAge)
                             await onAdded()
                             dismiss()
                         }

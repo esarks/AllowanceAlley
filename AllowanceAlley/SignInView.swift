@@ -16,13 +16,13 @@ struct SignInView: View {
 
                 Button("Sign In") {
                     Task {
-                        do { try await auth.signIn(email: email, password: password) }
+                        do { try await auth.signIn(email: email, password: password); errorMessage = nil }
                         catch { errorMessage = error.localizedDescription }
                     }
                 }
                 Button("Sign Up") {
                     Task {
-                        do { try await auth.signUp(email: email, password: password) }
+                        do { try await auth.signUp(email: email, password: password); errorMessage = nil }
                         catch { errorMessage = error.localizedDescription }
                     }
                 }
