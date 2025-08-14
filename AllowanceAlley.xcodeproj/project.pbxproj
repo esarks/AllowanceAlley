@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		600B4F882E4E0CCA001902DC /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 600B4F872E4E0CCA001902DC /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		600B4F032E4C1933001902DC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,11 +31,25 @@
 		600B4EF32E4C1932001902DC /* AllowanceAlley.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AllowanceAlley.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		600B4F022E4C1933001902DC /* AllowanceAlleyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AllowanceAlleyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		600B4F0C2E4C1933001902DC /* AllowanceAlleyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AllowanceAlleyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		600B4F892E4E23A9001902DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = AllowanceAlley/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		600B4F8D2E4E6C4A001902DC /* Exceptions for "AllowanceAlley" folder in "AllowanceAlley" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 600B4EF22E4C1932001902DC /* AllowanceAlley */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		600B4EF52E4C1932001902DC /* AllowanceAlley */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				600B4F8D2E4E6C4A001902DC /* Exceptions for "AllowanceAlley" folder in "AllowanceAlley" target */,
+			);
 			path = AllowanceAlley;
 			sourceTree = "<group>";
 		};
@@ -52,6 +70,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				600B4F882E4E0CCA001902DC /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,9 +94,11 @@
 		600B4EEA2E4C1932001902DC = {
 			isa = PBXGroup;
 			children = (
+				600B4F892E4E23A9001902DC /* Info.plist */,
 				600B4EF52E4C1932001902DC /* AllowanceAlley */,
 				600B4F052E4C1933001902DC /* AllowanceAlleyTests */,
 				600B4F0F2E4C1933001902DC /* AllowanceAlleyUITests */,
+				600B4F862E4E0CCA001902DC /* Frameworks */,
 				600B4EF42E4C1932001902DC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,6 +111,13 @@
 				600B4F0C2E4C1933001902DC /* AllowanceAlleyUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		600B4F862E4E0CCA001902DC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -113,6 +141,7 @@
 			);
 			name = AllowanceAlley;
 			packageProductDependencies = (
+				600B4F872E4E0CCA001902DC /* Supabase */,
 			);
 			productName = AllowanceAlley;
 			productReference = 600B4EF32E4C1932001902DC /* AllowanceAlley.app */;
@@ -279,6 +308,8 @@
 /* Begin XCBuildConfiguration section */
 		600B4F142E4C1933001902DC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -342,6 +373,8 @@
 		};
 		600B4F152E4C1933001902DC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -398,13 +431,16 @@
 		};
 		600B4F172E4C1933001902DC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AllowanceAlley/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -415,6 +451,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.esarks.AllowanceAlley;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -425,13 +462,16 @@
 		};
 		600B4F182E4C1933001902DC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = AllowanceAlley/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -442,6 +482,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				NEW_SETTING = "";
 				PRODUCT_BUNDLE_IDENTIFIER = com.esarks.AllowanceAlley;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -452,6 +493,8 @@
 		};
 		600B4F1A2E4C1933001902DC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -470,6 +513,8 @@
 		};
 		600B4F1B2E4C1933001902DC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -488,6 +533,8 @@
 		};
 		600B4F1D2E4C1933001902DC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -504,6 +551,8 @@
 		};
 		600B4F1E2E4C1933001902DC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 600B4EF52E4C1932001902DC /* AllowanceAlley */;
+			baseConfigurationReferenceRelativePath = Config.xcconfig;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -572,6 +621,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		600B4F842E4D1DEC001902DC /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 600B4F4D2E4CF2AE001902DC /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		600B4F872E4E0CCA001902DC /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 600B4F4D2E4CF2AE001902DC /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
