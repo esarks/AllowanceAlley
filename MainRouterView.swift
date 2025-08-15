@@ -2,14 +2,13 @@ import SwiftUI
 
 public struct MainRouterView: View {
     @EnvironmentObject var client: SupabaseService
-    @State private var stage: AppTypes.Stage = .unauth
+    @State private var stage: AppStage = .unauth
     @State private var message: String = "Checking…"
 
     public init() {}
 
     public var body: some View {
-        content
-            .task { await check() }
+        content.task { await check() }
     }
 
     @ViewBuilder private var content: some View {
@@ -23,10 +22,7 @@ public struct MainRouterView: View {
             .padding()
 
         case .needsSetup:
-            SetupFamilyView(onFinished: {
-                // Re-run checks after the user finishes setup
-                Task { await check() }
-            })
+            SetupFamilyView { Task { await check() } }
 
         case .ready(let ctx):
             RootTabsView(context: ctx)
@@ -42,11 +38,9 @@ public struct MainRouterView: View {
     }
 
     private func check() async {
-        // 1) Confirm we have a session
         let hasSession = (try? await client.session()) != nil
         guard hasSession else { stage = .unauth; return }
 
-        // 2) Resolve role + family or go to setup
         do {
             let ctx = try await RoleResolver.resolve(using: client)
             stage = .ready(ctx)

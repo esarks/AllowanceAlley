@@ -3,9 +3,8 @@ import Combine
 
 @MainActor
 final class SupabaseService: ObservableObject {
-    @Published var isSignedIn: Bool = true // set false to test unauth state
+    @Published var isSignedIn: Bool = true  // toggle for testing
 
-    // Replace with your real Supabase session lookup
     func session() async throws -> String? {
         return isSignedIn ? "ok" : nil
     }

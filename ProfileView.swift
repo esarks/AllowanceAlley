@@ -1,7 +1,8 @@
 import SwiftUI
 
-struct ProfileView: View {
-    var body: some View {
+public struct ProfileView: View {
+    public init() {}
+    public var body: some View {
         Text("Profile").padding()
     }
 }
