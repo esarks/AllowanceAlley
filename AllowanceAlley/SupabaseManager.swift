@@ -20,7 +20,6 @@ enum AppConfig {
 
 final class SupabaseManager {
     static let shared = SupabaseManager()
-
     let client: SupabaseClient
 
     private init() {
@@ -32,8 +31,7 @@ final class SupabaseManager {
         print("🧭 [Config] SUPABASE_ANON_KEY (prefix):", String(key.prefix(8)) + "…")
         #endif
 
-        let options = SupabaseClientOptions()
-        client = SupabaseClient(supabaseURL: url, supabaseKey: key, options: options)
+        client = SupabaseClient(supabaseURL: url, supabaseKey: key)
 
         #if DEBUG
         print("✅ SupabaseManager: client ready")

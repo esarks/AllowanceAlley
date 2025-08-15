@@ -5,25 +5,23 @@ import Supabase
 @MainActor
 final class AuthService: ObservableObject {
     static let shared = AuthService()
-
     private let client = SupabaseManager.shared.client
 
     @Published var session: Session?
     @Published var user: User?
     @Published var errorMessage: String?
 
-    // MARK: - Email + Password
-
-    /// Sends a confirmation email using your deep link.
+    // MARK: - Email + Password (Supabase Swift 2.x)
     func signUp(email: String, password: String) async throws {
         errorMessage = nil
         do {
+            let options = SignUpOptions(
+                emailRedirectTo: URL(string: "allowancealley://auth-callback")
+            )
             try await client.auth.signUp(
                 email: email,
                 password: password,
-                data: nil,
-                captchaToken: nil,
-                emailRedirectTo: URL(string: "allowancealley://auth-callback")
+                options: options
             )
         } catch {
             errorMessage = error.localizedDescription
@@ -31,13 +29,11 @@ final class AuthService: ObservableObject {
         }
     }
 
-    /// Returns a session immediately if the account is already confirmed.
     func signIn(email: String, password: String) async throws {
         errorMessage = nil
         do {
             let result = try await client.auth.signInWithPassword(
-                email: email,
-                password: password
+                email: email, password: password
             )
             self.session = result.session
             self.user = result.user
@@ -58,7 +54,7 @@ final class AuthService: ObservableObject {
         }
     }
 
-    // MARK: - Deep link handler for confirm/magic links
+    // MARK: - Deep‑link callback (2.x)
     func handleOpenURL(_ url: URL) async {
         do {
             try await client.auth.exchangeCodeFromCallbackURL(url)
@@ -66,13 +62,13 @@ final class AuthService: ObservableObject {
             self.session = s
             self.user = s.user
             #if DEBUG
-            print("🔐 Auth: callback ok, user:", user?.email ?? "<nil>")
+            print("🔐 Auth callback OK, user:", user?.email ?? "<nil>")
             #endif
         } catch {
-            #if DEBUG
-            print("🔐 Auth: callback failed:", error.localizedDescription)
-            #endif
             self.errorMessage = error.localizedDescription
+            #if DEBUG
+            print("🔐 Auth callback failed:", error.localizedDescription)
+            #endif
         }
     }
 }
