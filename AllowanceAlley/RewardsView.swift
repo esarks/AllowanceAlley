@@ -1,2 +1,14 @@
+// RewardsView.swift
 import SwiftUI
-struct RewardsView:View{let familyId:UUID;let childId:UUID?;var body: some View{NavigationStack{List{if childId==nil{Section("Catalog"){Label("Add a reward", systemImage:"plus.circle")}} else {Section("Browse Rewards"){Label("Ice Cream Trip — 75 pts", systemImage:"gift")}}}.navigationTitle(childId==nil ? "Rewards":"My Rewards")}}}
+
+struct RewardsView: View {
+  let familyId: UUID
+  let childId: UUID?
+
+  init(familyId: UUID? = nil, childId: UUID? = nil) {
+    self.familyId = familyId ?? UUID()
+    self.childId  = childId
+  }
+
+  var body: some View { Text("Rewards") }
+}
