@@ -2,9 +2,14 @@ import SwiftUI
 
 @main
 struct AllowanceAlleyApp: App {
-  @StateObject private var supabase = SupabaseService()
+    @StateObject private var familyStore = FamilyStore()        // or FamilyStore.demo()
+    @StateObject private var supabase    = SupabaseService()     // if you use this
 
-  var body: some Scene {
-    WindowGroup { MainRouterView().environmentObject(supabase) }
-  }
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+                .environmentObject(familyStore)                  // ⬅️ required
+                .environmentObject(supabase)                     // if used elsewhere
+        }
+    }
 }
