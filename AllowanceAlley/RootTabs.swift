@@ -14,20 +14,19 @@ public struct RootTabs: View {
     public var body: some View {
         TabView {
             if role.lowercased() == "parent" {
-                DashboardView(familyId: familyId)
-                    .tabItem { Label("Dashboard", systemImage: "house") }
-
-                ChoresView(familyId: familyId)
+                ContentUnavailableView("Approvals", systemImage: "inbox", description: Text("Parent inbox"))
+                    .tabItem { Label("Approvals", systemImage: "inbox") }
+                ContentUnavailableView("Catalog", systemImage: "archivebox", description: Text("Reward catalog"))
+                    .tabItem { Label("Catalog", systemImage: "archivebox") }
+                ContentUnavailableView("Chores", systemImage: "checklist", description: Text("Manage chores"))
                     .tabItem { Label("Chores", systemImage: "checklist") }
-
-                RewardsView(familyId: familyId)
-                    .tabItem { Label("Rewards", systemImage: "gift") }
             } else {
-                ChoresView(familyId: familyId, childId: childUserId)
-                    .tabItem { Label("My Chores", systemImage: "checkmark.circle") }
-
-                RewardsView(familyId: familyId, childId: childUserId)
-                    .tabItem { Label("Rewards", systemImage: "gift.fill") }
+                ContentUnavailableView("My Chores", systemImage: "checklist", description: Text("Assigned chores"))
+                    .tabItem { Label("My Chores", systemImage: "checklist") }
+                ContentUnavailableView("Rewards", systemImage: "gift", description: Text("Browse rewards"))
+                    .tabItem { Label("Rewards", systemImage: "gift") }
+                ContentUnavailableView("Points", systemImage: "target", description: Text("Points ledger"))
+                    .tabItem { Label("Points", systemImage: "target") }
             }
         }
     }

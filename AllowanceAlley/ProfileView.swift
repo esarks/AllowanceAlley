@@ -1,20 +1,3 @@
 import SwiftUI
-
-struct ProfileView: View {
-    @EnvironmentObject var store: FamilyStore
-    @State private var parentName = "Parent"
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Parent") {
-                    TextField("Name", text: $parentName)
-                }
-                Section("Family") {
-                    TextField("Family Name", text: $store.familyName)
-                }
-            }
-            .navigationTitle("Profile")
-        }
-    }
-}
+import Supabase
+struct ProfileView:View{let familyId:UUID;let userId:UUID?;var body: some View{NavigationStack{List{Section("My Info"){Label("User: \(userId?.uuidString ?? "Unknown")", systemImage:"person.circle"); Label("Family: \(familyId.uuidString)", systemImage:"person.3")} ; Section{Button("Sign Out"){Task{try? await SupabaseService.shared.client.auth.signOut()}}}}.navigationTitle("Profile")}}
