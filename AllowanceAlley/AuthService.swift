@@ -12,18 +12,16 @@ final class AuthService: ObservableObject {
     @Published var user: User?
     @Published var errorMessage: String?
 
-    // MARK: - Email + Password (legacy SDK you have)
     func signUp(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            guard let redirect = URL(string: "allowancealley://auth-callback") else {
-                throw URLError(.badURL)
-            }
-            try await client.auth.signUp(
-                email: email,
-                password: password,
-                redirectTo: redirect
-            )
+            // With Confirm email OFF, this returns an active session immediately.
+            try await client.auth.signUp(email: email, password: password)
+
+            // Pull the session and reflect it in the UI.
+            let s = try await client.auth.session
+            self.session = s
+            self.user = s.user
         } catch {
             errorMessage = error.localizedDescription
             throw error
