@@ -18,8 +18,3 @@ struct FamilyHomeView: View {
         .navigationTitle("Home")
     }
 }
-
-#Preview {
-    NavigationStack { FamilyHomeView() }
-        .environmentObject(AuthService.shared)   // preview-safe
-}

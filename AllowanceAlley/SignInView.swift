@@ -13,7 +13,6 @@ struct SignInView: View {
                 TextField("Email", text: $email)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
-
                 SecureField("Password", text: $password)
             }
 
@@ -26,9 +25,7 @@ struct SignInView: View {
                     do {
                         try await auth.signIn(email: email, password: password)
                         localError = nil
-                    } catch {
-                        localError = error.localizedDescription
-                    }
+                    } catch { localError = error.localizedDescription }
                 }
             }
 
@@ -37,17 +34,10 @@ struct SignInView: View {
                     do {
                         try await auth.signUp(email: email, password: password)
                         localError = "Check your email to confirm, then return here to Sign In."
-                    } catch {
-                        localError = error.localizedDescription
-                    }
+                    } catch { localError = error.localizedDescription }
                 }
             }
         }
         .navigationTitle("Sign In")
     }
-}
-
-#Preview {
-    NavigationStack { SignInView() }
-        .environmentObject(AuthService.shared)   // preview-safe
 }

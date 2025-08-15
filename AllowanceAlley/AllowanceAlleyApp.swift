@@ -9,8 +9,7 @@ struct AllowanceAlleyApp: App {
             NavigationStack {
                 FamilyHomeView()
             }
-            // Inject ONCE, as high as possible, so all descendants (including pushed views) inherit it.
-            .environmentObject(auth)
+            .environmentObject(auth)             // inject high in the tree
             .onOpenURL { url in
                 Task { await auth.handleOpenURL(url) }
             }
