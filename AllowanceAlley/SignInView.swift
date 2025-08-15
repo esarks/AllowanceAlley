@@ -42,10 +42,6 @@ struct SignInView: View {
                     }
                 }
             }
-
-            Button("Send Magic Link") {
-                Task { await auth.sendMagicLink(to: email) }
-            }
         }
         .navigationTitle("Sign In")
     }
