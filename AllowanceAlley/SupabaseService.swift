@@ -1,14 +1,18 @@
 import Foundation
 import Supabase
 
-// Optional convenience wrapper; use if you prefer calling here instead of directly in views.
-enum SupabaseService {
-    static var client: SupabaseClient { SupabaseManager.shared.client }
+final class SupabaseService {
+    static let shared = SupabaseService()
+    let client: SupabaseClient
 
-    static func session() async throws -> Session {
-        if let s = try? await client.auth.session {
-            return s
+    private init() {
+        let info = Bundle.main.infoDictionary ?? [:]
+        let urlString = info["SUPABASE_URL"] as? String ?? ""
+        let anonKey   = info["SUPABASE_ANON_KEY"] as? String ?? ""
+
+        guard let url = URL(string: urlString), !anonKey.isEmpty else {
+            fatalError("Missing or invalid SUPABASE_URL / SUPABASE_ANON_KEY in Info.plist")
         }
-        throw NSError(domain: "SupabaseService", code: 401, userInfo: [NSLocalizedDescriptionKey: "No active session"])
+        client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
     }
 }

@@ -1,0 +1,1 @@
+insert into public.chores (id, family_id, title, description, points, active) select gen_random_uuid(), f.id, 'Take out trash','Bins to curb by 7pm',10,true from public.families f where f.owner_id = auth.uid() limit 1;
