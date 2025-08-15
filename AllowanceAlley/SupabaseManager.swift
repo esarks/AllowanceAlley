@@ -1,6 +1,7 @@
 import Foundation
 import Supabase
 
+// MARK: - AppConfig (loads from Info.plist first, then Process env)
 enum AppConfig {
     static var url: URL {
         if let s = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,

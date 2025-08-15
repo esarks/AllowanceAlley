@@ -1,4 +1,3 @@
-
 import Foundation
 import Combine
 import Supabase
@@ -14,28 +13,34 @@ final class AuthService: ObservableObject {
     @Published var errorMessage: String?
 
     // MARK: - Email + Password
-    // Compatible with older Supabase Swift API:
-    // - signUp(email:password:)
-    // - signIn(email:password:)
-    // - session(from: URL)
+
+    /// Sends a confirmation email using your deep link.
     func signUp(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            // Older SDK does not accept emailRedirectTo in code; configure redirect in Dashboard.
-            _ = try await client.auth.signUp(email: email, password: password)
+            try await client.auth.signUp(
+                email: email,
+                password: password,
+                data: nil,
+                captchaToken: nil,
+                emailRedirectTo: URL(string: "allowancealley://auth-callback")
+            )
         } catch {
             errorMessage = error.localizedDescription
             throw error
         }
     }
 
+    /// Returns a session immediately if the account is already confirmed.
     func signIn(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            // Older SDK uses signIn(email:password:)
-            let s = try await client.auth.signIn(email: email, password: password)
-            self.session = s
-            self.user = s.user
+            let result = try await client.auth.signInWithPassword(
+                email: email,
+                password: password
+            )
+            self.session = result.session
+            self.user = result.user
         } catch {
             errorMessage = error.localizedDescription
             throw error
@@ -53,11 +58,11 @@ final class AuthService: ObservableObject {
         }
     }
 
-    // MARK: - Handle magic‑link / email confirmation callback
+    // MARK: - Deep link handler for confirm/magic links
     func handleOpenURL(_ url: URL) async {
         do {
-            // Older SDK parses the callback URL into a Session
-            let s = try await client.auth.session(from: url)
+            try await client.auth.exchangeCodeFromCallbackURL(url)
+            let s = try await client.auth.session
             self.session = s
             self.user = s.user
             #if DEBUG
