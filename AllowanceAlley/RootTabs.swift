@@ -13,58 +13,21 @@ public struct RootTabs: View {
 
     public var body: some View {
         TabView {
-            if role == "parent" {
-                // ----- Parent Tabs -----
-                ContentUnavailableView(
-                    "Dashboard",
-                    systemImage: "house",
-                    description: Text("Parent dashboard coming soon.")
-                )
-                .tabItem { Label("Dashboard", systemImage: "house") }
+            if role.lowercased() == "parent" {
+                DashboardView(familyId: familyId)
+                    .tabItem { Label("Dashboard", systemImage: "house") }
 
-                ContentUnavailableView(
-                    "Chores",
-                    systemImage: "checklist",
-                    description: Text("Manage family chores here.")
-                )
-                .tabItem { Label("Chores", systemImage: "checklist") }
+                ChoresView(familyId: familyId)
+                    .tabItem { Label("Chores", systemImage: "checklist") }
 
-                ContentUnavailableView(
-                    "Rewards",
-                    systemImage: "gift",
-                    description: Text("Manage family rewards here.")
-                )
-                .tabItem { Label("Rewards", systemImage: "gift") }
-
-                ContentUnavailableView(
-                    "Settings",
-                    systemImage: "gear",
-                    description: Text("Manage your account and family settings.")
-                )
-                .tabItem { Label("Settings", systemImage: "gear") }
-
+                RewardsView(familyId: familyId)
+                    .tabItem { Label("Rewards", systemImage: "gift") }
             } else {
-                // ----- Child Tabs -----
-                ContentUnavailableView(
-                    "My Chores",
-                    systemImage: "checkmark.circle",
-                    description: Text("Your assigned chores will appear here.")
-                )
-                .tabItem { Label("My Chores", systemImage: "checkmark.circle") }
+                ChoresView(familyId: familyId, childId: childUserId)
+                    .tabItem { Label("My Chores", systemImage: "checkmark.circle") }
 
-                ContentUnavailableView(
-                    "My Rewards",
-                    systemImage: "gift.fill",
-                    description: Text("View and redeem rewards.")
-                )
-                .tabItem { Label("My Rewards", systemImage: "gift.fill") }
-
-                ContentUnavailableView(
-                    "Profile",
-                    systemImage: "person.crop.circle",
-                    description: Text("View your profile and progress.")
-                )
-                .tabItem { Label("Profile", systemImage: "person.crop.circle") }
+                RewardsView(familyId: familyId, childId: childUserId)
+                    .tabItem { Label("Rewards", systemImage: "gift.fill") }
             }
         }
     }

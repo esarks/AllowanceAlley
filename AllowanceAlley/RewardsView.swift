@@ -1,29 +1,24 @@
 import SwiftUI
 
-struct RewardItem: Identifiable {
-    let id = UUID()
-    var name: String
-    var cost: Int
-}
-
 struct RewardsView: View {
-    @State private var rewards: [RewardItem] = [
-        .init(name: "Extra Screen Time", cost: 50),
-        .init(name: "Ice Cream", cost: 30),
-        .init(name: "Movie Night Pick", cost: 40)
-    ]
+    let familyId: UUID
+    var childId: UUID? = nil
 
     var body: some View {
         NavigationStack {
-            List(rewards) { reward in
-                HStack {
-                    Text(reward.name)
-                    Spacer()
-                    Text("\(reward.cost) pts").foregroundStyle(.secondary)
+            List {
+                Section("Rewards") {
+                    Label("Movie Night – 50 pts", systemImage: "film")
+                    Label("Ice Cream Trip – 75 pts", systemImage: "scooter")
+                    Label("Extra Screen Time – 30 pts", systemImage: "tv")
+                }
+                if let childId {
+                    Section("Child") {
+                        Label("Child: \(childId.uuidString.prefix(8))…", systemImage: "person")
+                    }
                 }
             }
             .navigationTitle("Rewards")
         }
     }
 }
-
