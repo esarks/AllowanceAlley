@@ -1,4 +1,3 @@
-// MainRouterView.swift
 import SwiftUI
 
 public struct MainRouterView: View {
@@ -10,17 +9,19 @@ public struct MainRouterView: View {
 
   public var body: some View { content.task { await check() } }
 
-  @ViewBuilder private var content: some View {
+  @ViewBuilder
+  private var content: some View {
     switch stage {
     case .unauth:
       VStack(spacing: 12) {
         Label("Sign in required", systemImage: "exclamationmark.triangle")
         Text(message).font(.footnote)
         Button("Retry") { Task { await check() } }
-      }.padding()
+      }
+      .padding()
 
     case .needsSetup:
-      SetupFamilyView { Task { await check() } }
+      SetupFamilyView(onFinished: { Task { await check() } })
 
     case .ready(let ctx):
       RootTabsView(context: ctx)
@@ -30,7 +31,8 @@ public struct MainRouterView: View {
         Label("Something went wrong", systemImage: "exclamationmark.triangle")
         Text(err).font(.footnote).multilineTextAlignment(.center)
         Button("Retry") { Task { await check() } }
-      }.padding()
+      }
+      .padding()
     }
   }
 
