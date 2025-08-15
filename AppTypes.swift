@@ -1,8 +1,6 @@
 import Foundation
 
-public enum UserRole: String, Codable, Equatable {
-    case parent, child
-}
+public enum UserRole: String, Codable, Equatable { case parent, child }
 
 public struct RoleContext: Equatable {
     public let familyId: String
