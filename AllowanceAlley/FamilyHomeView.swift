@@ -9,16 +9,17 @@ struct FamilyHomeView: View {
 
             if let email = auth.user?.email {
                 Text("Signed in as \(email)")
-                Button("Sign Out") {
-                    Task { await auth.signOut() }
-                }
+                Button("Sign Out") { Task { await auth.signOut() } }
             } else {
-                NavigationLink("Go to Sign In") {
-                    SignInView()
-                }
+                NavigationLink("Go to Sign In") { SignInView() }
             }
         }
         .padding()
         .navigationTitle("Home")
     }
+}
+
+#Preview {
+    NavigationStack { FamilyHomeView() }
+        .environmentObject(AuthService.shared)   // preview-safe
 }

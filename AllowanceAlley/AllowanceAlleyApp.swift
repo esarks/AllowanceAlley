@@ -8,10 +8,11 @@ struct AllowanceAlleyApp: App {
         WindowGroup {
             NavigationStack {
                 FamilyHomeView()
-                    .environmentObject(auth)
-                    .onOpenURL { url in
-                        Task { await auth.handleOpenURL(url) }
-                    }
+            }
+            // Inject ONCE, as high as possible, so all descendants (including pushed views) inherit it.
+            .environmentObject(auth)
+            .onOpenURL { url in
+                Task { await auth.handleOpenURL(url) }
             }
         }
     }

@@ -46,3 +46,8 @@ struct SignInView: View {
         .navigationTitle("Sign In")
     }
 }
+
+#Preview {
+    NavigationStack { SignInView() }
+        .environmentObject(AuthService.shared)   // preview-safe
+}
