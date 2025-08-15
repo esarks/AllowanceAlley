@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SignInView: View {
     @EnvironmentObject private var auth: AuthService
-
     @State private var email = ""
     @State private var password = ""
     @State private var localError: String?

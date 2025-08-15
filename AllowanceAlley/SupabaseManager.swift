@@ -1,7 +1,6 @@
 import Foundation
 import Supabase
 
-// MARK: - AppConfig (loads from Info.plist first, then Process env)
 enum AppConfig {
     static var url: URL {
         if let s = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String,
@@ -26,15 +25,7 @@ final class SupabaseManager {
         let url = AppConfig.url
         let key = AppConfig.anonKey
 
-        #if DEBUG
-        print("🧭 [Config] SUPABASE_URL:", url.absoluteString)
-        print("🧭 [Config] SUPABASE_ANON_KEY (prefix):", String(key.prefix(8)) + "…")
-        #endif
-
-        client = SupabaseClient(supabaseURL: url, supabaseKey: key)
-
-        #if DEBUG
-        print("✅ SupabaseManager: client ready")
-        #endif
+        let options = SupabaseClientOptions()
+        client = SupabaseClient(supabaseURL: url, supabaseKey: key, options: options)
     }
 }

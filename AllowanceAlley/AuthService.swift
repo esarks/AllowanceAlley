@@ -13,12 +13,9 @@ final class AuthService: ObservableObject {
     @Published var errorMessage: String?
 
     // MARK: - Email + Password (legacy SDK you have)
-
-    /// Sign up and have Supabase send a confirmation email that deep-links to the app.
     func signUp(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            // legacy API: `redirectTo:` exists and expects a URL
             guard let redirect = URL(string: "allowancealley://auth-callback") else {
                 throw URLError(.badURL)
             }
@@ -27,26 +24,19 @@ final class AuthService: ObservableObject {
                 password: password,
                 redirectTo: redirect
             )
-            #if DEBUG
-            print("✉️ SignUp: confirmation email requested → \(redirect.absoluteString)")
-            #endif
         } catch {
             errorMessage = error.localizedDescription
             throw error
         }
     }
 
-    /// Legacy sign-in; then fetch the current session.
     func signIn(email: String, password: String) async throws {
         errorMessage = nil
         do {
             try await client.auth.signIn(email: email, password: password)
-            let s = try await client.auth.session   // non-optional on this SDK
+            let s = try await client.auth.session
             self.session = s
             self.user = s.user
-            #if DEBUG
-            print("🔑 SignIn ok →", user?.email ?? "<nil>")
-            #endif
         } catch {
             errorMessage = error.localizedDescription
             throw error
@@ -67,18 +57,24 @@ final class AuthService: ObservableObject {
     // MARK: - Handle confirm/magic-link callback (legacy)
     func handleOpenURL(_ url: URL) async {
         do {
-            // legacy API returns a non-optional Session
             let s = try await client.auth.session(from: url)
             self.session = s
             self.user = s.user
-            #if DEBUG
-            print("🔐 Callback ok →", user?.email ?? "<nil>")
-            #endif
         } catch {
-            #if DEBUG
-            print("🔐 Callback failed:", error.localizedDescription)
-            #endif
             self.errorMessage = error.localizedDescription
+        }
+    }
+    // Add inside AuthService class
+    func refreshSessionOnLaunch() async {
+        errorMessage = nil
+        do {
+            let s = try await client.auth.session
+            self.session = s
+            self.user = s.user
+        } catch {
+            // No active session is normal on first run; don't surface as an error.
+            self.session = nil
+            self.user = nil
         }
     }
 }
