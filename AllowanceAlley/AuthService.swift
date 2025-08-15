@@ -12,25 +12,22 @@ final class AuthService: ObservableObject {
     @Published var user: User?
     @Published var errorMessage: String?
 
-    // MARK: - Email + Password (SDK in your project)
+    // MARK: - Email + Password (2.x API)
 
-    /// Sign up and have Supabase send a confirmation email that deep-links to the app.
+    /// Sign up and have Supabase email a confirmation link that deep-links back into the app.
     func signUp(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            // This SDK expects a URL (not String) for `redirectTo:`
-            guard let redirect = URL(string: "allowancealley://auth-callback") else {
-                throw URLError(.badURL)
-            }
-
+            let options = SignUpOptions(
+                emailRedirectTo: URL(string: "allowancealley://auth-callback")
+            )
             try await client.auth.signUp(
                 email: email,
                 password: password,
-                redirectTo: redirect
+                options: options
             )
-
             #if DEBUG
-            print("✉️ SignUp: confirmation email requested → \(redirect.absoluteString)")
+            print("✉️ SignUp: confirmation email requested (deep link set).")
             #endif
         } catch {
             errorMessage = error.localizedDescription
@@ -38,18 +35,16 @@ final class AuthService: ObservableObject {
         }
     }
 
-    /// Legacy sign-in; fetch session after the call.
+    /// Sign in with email/password (works immediately if email already confirmed).
     func signIn(email: String, password: String) async throws {
         errorMessage = nil
         do {
-            try await client.auth.signIn(
+            let result = try await client.auth.signInWithPassword(
                 email: email,
                 password: password
             )
-            let s = try await client.auth.session   // non-optional on this SDK
-            self.session = s
-            self.user = s.user
-
+            self.session = result.session
+            self.user = result.user
             #if DEBUG
             print("🔑 SignIn ok →", user?.email ?? "<nil>")
             #endif
@@ -70,22 +65,21 @@ final class AuthService: ObservableObject {
         }
     }
 
-    // MARK: - Handle confirm/magic-link callback (SDK in your project)
+    // MARK: - Handle confirm / magic-link callback (2.x API)
     func handleOpenURL(_ url: URL) async {
         do {
-            // This API returns a non-optional Session on your SDK
-            let s = try await client.auth.session(from: url)
+            try await client.auth.exchangeCodeFromCallbackURL(url)
+            let s = try await client.auth.session
             self.session = s
             self.user = s.user
-
             #if DEBUG
-            print("🔐 Callback ok →", user?.email ?? "<nil>")
+            print("🔐 Callback OK →", user?.email ?? "<nil>")
             #endif
         } catch {
+            self.errorMessage = error.localizedDescription
             #if DEBUG
             print("🔐 Callback failed:", error.localizedDescription)
             #endif
-            self.errorMessage = error.localizedDescription
         }
     }
 }
