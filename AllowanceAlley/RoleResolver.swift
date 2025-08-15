@@ -1,39 +1,17 @@
+// RoleResolver.swift
 import Foundation
-import Supabase
 
-struct UserContext: Decodable {
-    let familyId: UUID
-    let role: String            // "parent" | "child"
-    let childUserId: UUID?      // present when role == "child"
+enum RoleResolverError: Error {
+    case needsSetup
 }
 
 enum RoleResolver {
-    static func resolve(using client: SupabaseClient) async throws -> UserContext {
-        let session = try await client.auth.session
-        let userId: UUID = session.user.id
-
-        // Parent? owner of a family
-        struct FamilyRow: Decodable { let id: UUID; let owner_id: UUID }
-        let owned: [FamilyRow] = try await client.database
-            .from("families").select()
-            .eq("owner_id", value: userId)
-            .limit(1).execute().value
-        if let fam = owned.first {
-            return UserContext(familyId: fam.id, role: "parent", childUserId: nil)
-        }
-
-        // Child? member of a family
-        struct MemberRow: Decodable { let family_id: UUID; let user_id: UUID }
-        let memberships: [MemberRow] = try await client.database
-            .from("family_members").select()
-            .eq("user_id", value: userId)
-            .limit(1).execute().value
-        if let m = memberships.first {
-            return UserContext(familyId: m.family_id, role: "child", childUserId: userId)
-            }
-
-        // Signed in but not linked to a family
-        throw NSError(domain: "RoleResolver", code: 404,
-                      userInfo: [NSLocalizedDescriptionKey: "No family found for this user."])
+    static func resolve(using client: SupabaseService) async throws -> RoleContext {
+        // TODO: Replace with real Supabase queries:
+        // If user has no family/profile row -> throw .needsSetup
+        // Else return RoleContext with familyId + role
+        let demoHasFamily = true
+        if !demoHasFamily { throw RoleResolverError.needsSetup }
+        return RoleContext(familyId: "demo-family", role: .parent)
     }
 }

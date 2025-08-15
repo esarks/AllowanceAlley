@@ -1,3 +1,12 @@
+// ProfileView.swift
 import SwiftUI
-import Supabase
-struct ProfileView:View{let familyId:UUID;let userId:UUID?;var body: some View{NavigationStack{List{Section("My Info"){Label("User: \(userId?.uuidString ?? "Unknown")", systemImage:"person.circle"); Label("Family: \(familyId.uuidString)", systemImage:"person.3")} ; Section{Button("Sign Out"){Task{try? await SupabaseService.shared.client.auth.signOut()}}}}.navigationTitle("Profile")}}
+
+struct ProfileView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Text("Profile").font(.title2)
+            Text("Coming soon")
+        }
+        .padding()
+    }
+}

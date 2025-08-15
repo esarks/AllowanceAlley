@@ -1,18 +1,16 @@
+// SupabaseService.swift
 import Foundation
-import Supabase
+import SwiftUI
+import Combine
 
-final class SupabaseService {
-    static let shared = SupabaseService()
-    let client: SupabaseClient
+@MainActor
+final class SupabaseService: ObservableObject {
+    // TODO: replace with your real Supabase client & session state.
+    // This placeholder keeps the app compiling.
+    @Published var isSignedIn: Bool = false
 
-    private init() {
-        let info = Bundle.main.infoDictionary ?? [:]
-        let urlString = info["SUPABASE_URL"] as? String ?? ""
-        let anonKey   = info["SUPABASE_ANON_KEY"] as? String ?? ""
-
-        guard let url = URL(string: urlString), !anonKey.isEmpty else {
-            fatalError("Missing or invalid SUPABASE_URL / SUPABASE_ANON_KEY in Info.plist")
-        }
-        client = SupabaseClient(supabaseURL: url, supabaseKey: anonKey)
+    func session() async throws -> String? {
+        // Return nil when no session
+        return isSignedIn ? "ok" : nil
     }
 }
