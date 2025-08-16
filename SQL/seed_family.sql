@@ -1,1 +1,0 @@
-insert into public.families (name, owner_id) values ('My Family', auth.uid());

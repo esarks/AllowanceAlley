@@ -1,1 +1,0 @@
-insert into public.rewards (id, family_id, title, details, cost_points, active) select gen_random_uuid(), f.id, 'Ice Cream Trip','One scoop at local shop',75,true from public.families f where f.owner_id = auth.uid() limit 1;

@@ -34,22 +34,9 @@
 		600B4F892E4E23A9001902DC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = AllowanceAlley/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		600B4F8D2E4E6C4A001902DC /* Exceptions for "AllowanceAlley" folder in "AllowanceAlley" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 600B4EF22E4C1932001902DC /* AllowanceAlley */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		600B4EF52E4C1932001902DC /* AllowanceAlley */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				600B4F8D2E4E6C4A001902DC /* Exceptions for "AllowanceAlley" folder in "AllowanceAlley" target */,
-			);
 			path = AllowanceAlley;
 			sourceTree = "<group>";
 		};
