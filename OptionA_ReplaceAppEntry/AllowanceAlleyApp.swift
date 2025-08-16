@@ -2,20 +2,21 @@ import SwiftUI
 
 @main
 struct AllowanceAlleyApp: App {
-    // If you already create FamilyStore elsewhere, use that instead.
-    // Try FamilyStore() first; if it fails to compile, fall back to FamilyStore.demo().
-    @StateObject private var familyStore = FamilyStore() // or FamilyStore.demo()
-    @StateObject private var ledger      = AALedgerStore()
-    @StateObject private var choreStore  = AAChoreStore()
-    @StateObject private var rewardStore = AARewardStore()
-
+    init() {
+        print("🚨 RESCUE MODE ACTIVE — Option A @main replacement is running")
+    }
     var body: some Scene {
         WindowGroup {
-            ContentViewBRD()
-                .environmentObject(familyStore)
-                .environmentObject(ledger)
-                .environmentObject(choreStore)
-                .environmentObject(rewardStore)
+            RescueRootView()
+                .tint(.orange)
+                .overlay(alignment: .top) {
+                    Text("RESCUE MODE")
+                        .font(.caption2).bold()
+                        .padding(6)
+                        .background(.orange.opacity(0.15))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .padding(.top, 6)
+                }
         }
     }
 }
