@@ -1,41 +1,42 @@
-
 import Foundation
 
-// MARK: - Ledger Models
-
-struct AALedgerEntry: Codable, Identifiable, Equatable {
-    enum Kind: String, Codable { case earn, redeem }
-    var id = UUID()
-    var childId: UUID
-    var kind: Kind
-    var points: Int
-    var note: String
-    var at: Date = .init()
+public struct AALedgerEntry: Codable, Identifiable, Equatable {
+    public enum Kind: String, Codable { case earn, redeem }
+    public var id = UUID()
+    public var childId: UUID
+    public var kind: Kind
+    public var points: Int
+    public var note: String
+    public var at: Date = .init()
 }
 
-// MARK: - Store
-
 @MainActor
-final class AALedgerStore: ObservableObject {
-    @Published private(set) var entries: [AALedgerEntry] = []
+public final class AALedgerStore: ObservableObject {
+    @Published public private(set) var entries: [AALedgerEntry] = []
 
-    init() { load() }
+    public init() { load() }
 
-    func totalPoints(for childId: UUID) -> Int {
+    public func totalPoints(for childId: UUID) -> Int {
         entries.reduce(0) { acc, e in
             guard e.childId == childId else { return acc }
             return acc + (e.kind == .earn ? e.points : -e.points)
         }
     }
 
-    func earn(_ pts: Int, note: String, childId: UUID) {
+    public func pointsThisWeek(for childId: UUID) -> Int {
+        let cal = Calendar.current
+        let startOfWeek = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) ?? Date()
+        return entries.filter { $0.childId == childId && $0.at >= startOfWeek }.reduce(0) { $0 + ($1.kind == .earn ? $1.points : -$1.points) }
+    }
+
+    public func earn(_ pts: Int, note: String, childId: UUID) {
         guard pts > 0 else { return }
         entries.append(.init(childId: childId, kind: .earn, points: pts, note: note))
         save()
     }
 
     @discardableResult
-    func redeem(_ pts: Int, note: String, childId: UUID) -> Bool {
+    public func redeem(_ pts: Int, note: String, childId: UUID) -> Bool {
         guard pts > 0 else { return false }
         if totalPoints(for: childId) < pts { return false }
         entries.append(.init(childId: childId, kind: .redeem, points: pts, note: note))
@@ -43,28 +44,16 @@ final class AALedgerStore: ObservableObject {
         return true
     }
 
-    // MARK: - Persistence
-
     private var fileURL: URL {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         return dir.appendingPathComponent("aa_ledger.json")
     }
-
     private func save() {
-        do {
-            let data = try JSONEncoder().encode(entries)
-            try data.write(to: fileURL, options: .atomic)
-        } catch {
-            print("AALedgerStore save error:", error)
-        }
+        do { let data = try JSONEncoder().encode(entries); try data.write(to: fileURL, options: .atomic) }
+        catch { print("AALedgerStore save error:", error) }
     }
-
     private func load() {
-        do {
-            let data = try Data(contentsOf: fileURL)
-            entries = try JSONDecoder().decode([AALedgerEntry].self, from: data)
-        } catch {
-            entries = [] // first run
-        }
+        do { let data = try Data(contentsOf: fileURL); entries = try JSONDecoder().decode([AALedgerEntry].self, from: data) }
+        catch { entries = [] }
     }
 }

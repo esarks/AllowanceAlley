@@ -1,38 +1,38 @@
 
-# AA Additive Features (Non‑Breaking)
+# Additive Tabs (wired to FamilyStore)
 
-This pack adds a local points ledger and two optional V2 screens.
-It **does not** modify existing files. Drag these into Xcode and check your app target.
+Drop-in, no-breaking features:
+- `AALedgerStore.swift` (persisted points)
+- `ChoresV2View.swift` & `RewardsV2View.swift` (auto-pick first child from `FamilyStore`)
+- `ChoresTabView.swift` & `RewardsTabView.swift` (optional adapters)
+- `AARewardsCatalog.swift` (demo rewards)
 
-## Files
-- `AALedgerStore.swift` — persisted earn/redeem ledger (Documents/aa_ledger.json)
-- `AARewardsCatalog.swift` — simple demo rewards
-- `ChoresV2View.swift` — chores that earn points
-- `RewardsV2View.swift` — redeem points for rewards
-
-## Inject the store (required once)
+## Inject the store(s)
 
 ```swift
-// AllowanceAlleyApp.swift
 @main
 struct AllowanceAlleyApp: App {
-    @StateObject private var ledger = AALedgerStore()
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-                .environmentObject(ledger) // add this
-        }
+  @StateObject private var ledger = AALedgerStore()
+  @StateObject private var familyStore = FamilyStore.demo() // or your real one
+
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+        .environmentObject(familyStore)
+        .environmentObject(ledger)
     }
+  }
 }
 ```
 
-## Try the screens (optional tabs)
+## Use as extra tabs
+
 ```swift
 TabView {
-  // your existing tabs…
-  ChoresV2View().tabItem { Label("Chores 2", systemImage: "checkmark.circle") }
-  RewardsV2View().tabItem { Label("Rewards 2", systemImage: "gift") }
+  // existing tabs...
+  ChoresV2View().tabItem { Label("Chores", systemImage: "checkmark.circle") }
+  RewardsV2View().tabItem { Label("Rewards", systemImage: "gift") }
 }
 ```
 
-Later, replace the demo `childId` with your selected child id from your store.
+If no child exists, the screens show a friendly "No child yet" state instead of a crash.
