@@ -1,0 +1,8 @@
+# Repository Manifest — AllowanceAlley
+- Commit: dbda929db0d8c7c42f6e67e717dc9db06b177d1f
+- Generated: Mon Aug 18 22:14:46 UTC 2025
+
+## Tracked files
+
+| Path | Size (bytes) | Hash (sha256) |
+|---|---:|---|
