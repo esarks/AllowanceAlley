@@ -1,0 +1,19 @@
+# Repository Manifest — AllowanceAlley
+- Commit: 25ad22bb86a12fed587279b2466e17120cae9e82
+- Generated: Mon Aug 18 22:20:43 UTC 2025
+
+## Tracked files
+
+| Path | Size (bytes) | Hash (sha256) |
+|---|---:|---|
+| .DS_Store | 6148 | 4ecb494e9f4c37f6f3b6d0b0c1dd39432146c8b62729d13fb7c2373bc3c62810 |
+| .gitattributes | 66 | 1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b |
+| AllowanceAlleyApp.swift | 726 | 75658580a6f5dcfc3ec6355d7428f4914803e2ffd13b490d8702eea0088b8171 |
+| Assets.xcassets/AccentColor.colorset/Contents.json | 123 | 9af65086fa30b49252fae1a1225731691de794f7775af74d71befeb507d12b7c |
+| Assets.xcassets/AppIcon.appiconset/Contents.json | 607 | d776cfae1b33325f70befa1b0fc5e5420c660655603409e8588d94fd8fc6e112 |
+| Assets.xcassets/Contents.json | 63 | 0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b |
+| Configure/Info.plist | 1304 | 24e6f34cc6ad3746366c3bd01be15f548d9fd5ca0033ddfac882b7c2d40d1a61 |
+| ContentView.swift | 1599 | 243304dc61b07162963d45d5a7801adf726f2fd1ebeaa5b1acd8930e51960d50 |
+| Item.swift | 247 | d88c9429607bb927b860c72a4e81a9e8028e3d07af2509f526b86eabd4831ab2 |
+| Scripts/create_manifest.sh | 838 | dde6e5359b37015ced4a208a5ea444144f0de293d26dde4b22f3ee541a9a4383 |
+| Scripts/repo_manifest.txt | 399 | e681577110e5c4fad5aec3edfeeefbe1fd8ae373e4d34c7144a3526d4dfe176a |
