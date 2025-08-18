@@ -11,18 +11,12 @@ struct EmailAuthView: View {
                         .textContentType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .keyboardType(.emailAddress)
-
                     SecureField("Password", text: $auth.password)
                         .textContentType(.newPassword)
-
                     Button {
                         Task { await auth.signUp() }
-                    } label: {
-                        HStack {
-                            if auth.isLoading { ProgressView() }
-                            Text("Sign up")
-                        }
-                    }
+                    } label: { auth.isLoading ? AnyView(ProgressView().eraseToAnyView())
+                                              : AnyView(Text("Sign up").eraseToAnyView()) }
                     .disabled(auth.email.isEmpty || auth.password.isEmpty || auth.isLoading)
                 }
 
@@ -30,15 +24,9 @@ struct EmailAuthView: View {
                     TextField("6-digit code", text: $auth.code)
                         .keyboardType(.numberPad)
                         .textContentType(.oneTimeCode)
-
                     Button {
                         Task { await auth.verifyCode() }
-                    } label: {
-                        HStack {
-                            if auth.isLoading { ProgressView() }
-                            Text("Verify")
-                        }
-                    }
+                    } label: { Text("Verify") }
                     .disabled(auth.code.isEmpty || auth.isLoading)
 
                     if auth.isVerified {
@@ -47,15 +35,10 @@ struct EmailAuthView: View {
                     }
                 }
 
-                Section("Sign in (after verification)") {
+                Section("Sign in") {
                     Button {
                         Task { await auth.signIn() }
-                    } label: {
-                        HStack {
-                            if auth.isLoading { ProgressView() }
-                            Text("Sign in with email & password")
-                        }
-                    }
+                    } label: { Text("Sign in with email & password") }
                     .disabled(auth.email.isEmpty || auth.password.isEmpty || auth.isLoading)
 
                     if auth.isSignedIn {
@@ -65,28 +48,23 @@ struct EmailAuthView: View {
                 }
 
                 if let err = auth.errorMessage, !err.isEmpty {
-                    Section {
-                        Text(err).foregroundStyle(.red)
-                    }
+                    Section { Text(err).foregroundStyle(.red) }
                 }
 
                 if auth.isSignedIn {
                     Section {
                         Button(role: .destructive) {
                             Task { await auth.signOut() }
-                        } label: {
-                            HStack {
-                                if auth.isLoading { ProgressView() }
-                                Text("Sign out")
-                            }
-                        }
+                        } label: { Text("Sign out") }
                     }
                 }
             }
             .navigationTitle("Email Auth")
         }
-        .onAppear {
-            Task { await auth.bootstrap() }
-        }
+        .onAppear { Task { await auth.bootstrap() } }
     }
+}
+
+private extension View {
+    func eraseToAnyView() -> AnyView { AnyView(self) }
 }
