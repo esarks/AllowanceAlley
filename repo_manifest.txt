@@ -1,6 +1,6 @@
 # Repository Manifest — AllowanceAlley
-- Commit: 6b0302507fff4d05f36a908ba6ed08e530a942d5
-- Generated: Mon Aug 18 23:46:45 UTC 2025
+- Commit: 3a21922ba211d701ff6ef11dd09770bb90292a44
+- Generated: Mon Aug 18 23:47:41 UTC 2025
 
 ## Tracked files
 
@@ -13,6 +13,10 @@
 | Assets.xcassets/AppIcon.appiconset/Contents.json | 607 | d776cfae1b33325f70befa1b0fc5e5420c660655603409e8588d94fd8fc6e112 |
 | Assets.xcassets/Contents.json | 63 | 0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b |
 | AuthService.swift | 2704 | ab7585be2a0cd43043888b31fd6618978da8fbc75e5305e91069144dfaea99e6 |
+| Child.swift | 586 | 31fdc7c2727a9df230b0b46998a9decb30a70ac30735d15191738997dcefcd81 |
+| ChildFormView.swift | 3230 | 11ebd5c2aee805f4dc12aacb49d6d9cd14aa0c1deb50377534a5224f25983fed |
+| ChildService.swift | 4225 | ade18b56a3134706cdcc2561e729b6bac41e7fb188004eee7193d06bf39f158c |
+| ChildrenListView.swift | 3419 | 73a295724d9eb534a6062a3bd21f7ab92ad7155a1613257da184cc441a1d2703 |
 | Configure/Info.plist | 1341 | 005721ea2b11118766d815e2bec75ad0b4cf42c5a85b4e45ab1b2873de55075c |
 | ContentView.swift | 1599 | 243304dc61b07162963d45d5a7801adf726f2fd1ebeaa5b1acd8930e51960d50 |
 | EmailAuthView.swift | 814 | 977d3325089bfbab0db71a1168199edc24b8398dda090340888873f957c137e6 |
@@ -20,4 +24,4 @@
 | Scripts/create_manifest.sh | 838 | dde6e5359b37015ced4a208a5ea444144f0de293d26dde4b22f3ee541a9a4383 |
 | Scripts/repo_manifest.txt | 399 | e681577110e5c4fad5aec3edfeeefbe1fd8ae373e4d34c7144a3526d4dfe176a |
 | SupabaseManager.swift | 1149 | d6e0ec03d6812165cfaf785db8a32b6a1738e2d9a057e41ccf9e9f39dc13cb8a |
-| repo_manifest.txt | 1631 | cd1630784e1bd58ad2e86f53d1629755c47f4820d2671bb9bf94e4453b5ab196 |
+| repo_manifest.txt | 2016 | c9e345810a6f0dffe511656bbf225c2f615a63b34b82cc6fa4cd0b6b12ffb5ec |

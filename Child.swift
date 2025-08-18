@@ -7,11 +7,9 @@ struct Child: Identifiable, Codable, Equatable {
     var birthdate: Date?
     var avatarURL: URL?
 
-    // Derived convenience
     var age: Int? {
         guard let b = birthdate else { return nil }
-        let comps = Calendar.current.dateComponents([.year], from: b, to: Date())
-        return comps.year
+        return Calendar.current.dateComponents([.year], from: b, to: Date()).year
     }
 
     enum CodingKeys: String, CodingKey {

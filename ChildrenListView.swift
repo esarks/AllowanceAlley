@@ -22,7 +22,7 @@ struct ChildrenListView: View {
                             .frame(width: 44, height: 44)
                             .clipShape(Circle())
 
-                            VStack(alignment: .leading) {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text(child.name).font(.headline)
                                 if let age = child.age {
                                     Text("\(age) yrs").foregroundStyle(.secondary)
@@ -42,46 +42,38 @@ struct ChildrenListView: View {
             .navigationTitle("Children")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAdd = true
-                    } label: { Image(systemName: "plus") }
+                    Button { showingAdd = true } label: { Image(systemName: "plus") }
                 }
             }
             .sheet(isPresented: $showingAdd) {
-                ChildFormView(mode: .create) { name, birthdate, imageData in
+                ChildFormView(mode: .create) { name, birthdate, data in
                     Task {
                         await svc.add(name: name, birthdate: birthdate)
-                        if let new = svc.children.last, let data = imageData {
-                            await svc.uploadAvatar(for: new, imageData: data)
+                        if let new = svc.children.last, let d = data {
+                            await svc.uploadAvatar(for: new, imageData: d)
                         }
                     }
                 }
-                .presentationDetents([.medium, .large])
             }
             .sheet(item: $editing) { kid in
-                ChildFormView(mode: .edit(existing: kid)) { name, birthdate, imageData in
+                ChildFormView(mode: .edit(existing: kid)) { name, birthdate, data in
                     Task {
                         var updated = kid
                         updated.name = name
                         updated.birthdate = birthdate
                         await svc.update(child: updated)
-                        if let data = imageData {
-                            await svc.uploadAvatar(for: updated, imageData: data)
+                        if let d = data {
+                            await svc.uploadAvatar(for: updated, imageData: d)
                         }
                     }
                 }
-                .presentationDetents([.medium, .large])
             }
-            .overlay {
-                if svc.isLoading { ProgressView() }
-            }
+            .overlay { if svc.isLoading { ProgressView() } }
             .task { await svc.load() }
             .alert("Error", isPresented: Binding(
                 get: { svc.errorMessage != nil },
                 set: { _ in svc.errorMessage = nil })
-            ) {
-                Button("OK", role: .cancel) { }
-            } message: {
+            ) { Button("OK", role: .cancel) {} } message: {
                 Text(svc.errorMessage ?? "")
             }
         }

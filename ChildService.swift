@@ -1,6 +1,5 @@
 import Foundation
 import Supabase
-import PhotosUI
 import UIKit
 
 @MainActor
@@ -13,19 +12,19 @@ final class ChildService: ObservableObject {
 
     private func currentUserId() async throws -> UUID {
         let user = try await client.auth.user()
-        guard let id = UUID(uuidString: user.id.uuidString) ?? UUID(uuidString: user.id.description) ?? UUID(uuidString: user.id) else {
-            throw NSError(domain: "ChildService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid user id"])
+        // user.id is a UUID-compatible string in recent SDKs
+        guard let id = UUID(uuidString: user.id) else {
+            throw NSError(domain: "ChildService", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid user id"])
         }
         return id
     }
 
-    // MARK: - CRUD
-
+    // MARK: Load
     func load() async {
         do {
             isLoading = true; defer { isLoading = false }
             let uid = try await currentUserId()
-            // Fetch children for this parent
             let rows: [Child] = try await client.database
                 .from("children")
                 .select()
@@ -39,54 +38,64 @@ final class ChildService: ObservableObject {
         }
     }
 
+    // MARK: Create
     func add(name: String, birthdate: Date?) async {
         do {
             isLoading = true; defer { isLoading = false }
             let uid = try await currentUserId()
+
             struct NewChild: Encodable {
                 let parent_user_id: String
                 let name: String
                 let birthdate: String?
             }
+
+            let iso = ISO8601DateFormatter()
             let payload = NewChild(
                 parent_user_id: uid.uuidString,
                 name: name,
-                birthdate: birthdate.map { ISO8601DateFormatter().string(from: $0) }
+                birthdate: birthdate.map { iso.string(from: $0) }
             )
 
-            // insert returning row
-            let inserted: [Child] = try await client.database
+            // Insert (no 'values:' label in this SDK)
+            try await client.database
                 .from("children")
-                .insert(values: payload, returning: .representation)
+                .insert(payload)
                 .execute()
-                .decoded()
-            if let c = inserted.first { children.append(c) }
+
+            // Refresh
+            await load()
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
         }
     }
 
+    // MARK: Update
     func update(child: Child) async {
         do {
             isLoading = true; defer { isLoading = false }
-            let payload = child
-            _ = try await client.database
+
+            try await client.database
                 .from("children")
-                .update(values: payload)
+                .update(child) // no 'values:' label
                 .eq("id", child.id.uuidString)
                 .execute()
+
             if let idx = children.firstIndex(where: { $0.id == child.id }) {
                 children[idx] = child
+            } else {
+                await load()
             }
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
         }
     }
 
+    // MARK: Delete
     func delete(id: UUID) async {
         do {
             isLoading = true; defer { isLoading = false }
-            _ = try await client.database
+            try await client.database
                 .from("children")
                 .delete()
                 .eq("id", id.uuidString)
@@ -97,24 +106,20 @@ final class ChildService: ObservableObject {
         }
     }
 
-    // MARK: - Avatar upload (optional but nice)
-
+    // MARK: Avatar (optional; requires public 'avatars' bucket)
     func uploadAvatar(for child: Child, imageData: Data) async {
         do {
             isLoading = true; defer { isLoading = false }
             let path = "child/\(child.id.uuidString).jpg"
-            // upsert into public 'avatars' bucket
+
             try await client.storage
                 .from("avatars")
-                .upload(
-                    path: path,
-                    file: imageData,
-                    options: FileOptions(cacheControl: "3600", upsert: true)
-                )
-            // public URL (bucket must be public in Supabase UI)
-            let url = try client.storage.from("avatars").getPublicURL(path: path)
+                .upload(path: path, file: imageData,
+                        options: FileOptions(cacheControl: "3600", upsert: true))
+
+            let publicURL = try client.storage.from("avatars").getPublicURL(path: path)
             var updated = child
-            updated.avatarURL = URL(string: url)
+            updated.avatarURL = URL(string: publicURL)
             await update(child: updated)
         } catch {
             self.errorMessage = (error as NSError).localizedDescription

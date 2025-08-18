@@ -7,18 +7,25 @@ struct AllowanceAlleyApp: App {
 
     var body: some Scene {
         WindowGroup {
-            EmailAuthView()          // <- show the auth screen
-                .environmentObject(auth)
-                .onOpenURL { url in   // handle magic-link callbacks
-                    Task {
-                        do {
-                            try await SupabaseManager.shared.client.auth.session(from: url)
-                            auth.isSignedIn = true
-                        } catch {
-                            auth.errorMessage = (error as NSError).localizedDescription
-                        }
+            Group {
+                if auth.isSignedIn {
+                    ChildrenListView()
+                        .environmentObject(auth)
+                } else {
+                    EmailAuthView()
+                        .environmentObject(auth)
+                }
+            }
+            .onOpenURL { url in
+                Task {
+                    do {
+                        try await SupabaseManager.shared.client.auth.session(from: url)
+                        auth.isSignedIn = true
+                    } catch {
+                        auth.errorMessage = (error as NSError).localizedDescription
                     }
                 }
+            }
         }
     }
 }
