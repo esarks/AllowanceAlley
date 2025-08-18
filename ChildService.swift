@@ -12,7 +12,6 @@ final class ChildService: ObservableObject {
 
     private func currentUserId() async throws -> UUID {
         let user = try await client.auth.user()
-        // user.id is a UUID-compatible string in recent SDKs
         guard let id = UUID(uuidString: user.id) else {
             throw NSError(domain: "ChildService", code: 1,
                           userInfo: [NSLocalizedDescriptionKey: "Invalid user id"])
@@ -20,7 +19,7 @@ final class ChildService: ObservableObject {
         return id
     }
 
-    // MARK: Load
+    // READ
     func load() async {
         do {
             isLoading = true; defer { isLoading = false }
@@ -28,101 +27,80 @@ final class ChildService: ObservableObject {
             let rows: [Child] = try await client.database
                 .from("children")
                 .select()
-                .eq("parent_user_id", uid.uuidString)
+                .eq("parent_user_id", uid.uuidString)    // <- String id
                 .order("created_at", ascending: true)
                 .execute()
                 .decoded()
             self.children = rows
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
+        } catch { self.errorMessage = (error as NSError).localizedDescription }
     }
 
-    // MARK: Create
+    // CREATE
     func add(name: String, birthdate: Date?) async {
+        struct NewChild: Encodable {
+            let parent_user_id: String
+            let name: String
+            let birthdate: String?
+        }
         do {
             isLoading = true; defer { isLoading = false }
             let uid = try await currentUserId()
-
-            struct NewChild: Encodable {
-                let parent_user_id: String
-                let name: String
-                let birthdate: String?
-            }
-
             let iso = ISO8601DateFormatter()
             let payload = NewChild(
                 parent_user_id: uid.uuidString,
                 name: name,
                 birthdate: birthdate.map { iso.string(from: $0) }
             )
-
-            // Insert (no 'values:' label in this SDK)
-            try await client.database
-                .from("children")
-                .insert(payload)
-                .execute()
-
-            // Refresh
+            try await client.database.from("children").insert(payload).execute()   // no label, no decode
             await load()
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
+        } catch { self.errorMessage = (error as NSError).localizedDescription }
     }
 
-    // MARK: Update
+    // UPDATE
     func update(child: Child) async {
+        // convert to DB payload so URL encodes as String
+        struct UpdateChild: Encodable {
+            let name: String
+            let birthdate: String?
+            let avatar_url: String?
+        }
         do {
             isLoading = true; defer { isLoading = false }
-
+            let iso = ISO8601DateFormatter()
+            let payload = UpdateChild(
+                name: child.name,
+                birthdate: child.birthdate.map { iso.string(from: $0) },
+                avatar_url: child.avatarURL?.absoluteString
+            )
             try await client.database
                 .from("children")
-                .update(child) // no 'values:' label
+                .update(payload)                                 // no 'values:' label
                 .eq("id", child.id.uuidString)
                 .execute()
-
-            if let idx = children.firstIndex(where: { $0.id == child.id }) {
-                children[idx] = child
-            } else {
-                await load()
-            }
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
+            await load()
+        } catch { self.errorMessage = (error as NSError).localizedDescription }
     }
 
-    // MARK: Delete
+    // DELETE
     func delete(id: UUID) async {
         do {
             isLoading = true; defer { isLoading = false }
-            try await client.database
-                .from("children")
-                .delete()
-                .eq("id", id.uuidString)
-                .execute()
+            try await client.database.from("children").delete().eq("id", id.uuidString).execute()
             children.removeAll { $0.id == id }
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
+        } catch { self.errorMessage = (error as NSError).localizedDescription }
     }
 
-    // MARK: Avatar (optional; requires public 'avatars' bucket)
+    // AVATAR (public 'avatars' bucket)
     func uploadAvatar(for child: Child, imageData: Data) async {
         do {
             isLoading = true; defer { isLoading = false }
             let path = "child/\(child.id.uuidString).jpg"
-
-            try await client.storage
-                .from("avatars")
-                .upload(path: path, file: imageData,
-                        options: FileOptions(cacheControl: "3600", upsert: true))
-
-            let publicURL = try client.storage.from("avatars").getPublicURL(path: path)
+            try await client.storage.from("avatars")
+                .upload(path: path, file: imageData, options: FileOptions(cacheControl: "3600", upsert: true))
+            let url = try client.storage.from("avatars").getPublicURL(path: path)
             var updated = child
-            updated.avatarURL = URL(string: publicURL)
+            updated.avatarURL = URL(string: url)
             await update(child: updated)
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
+        } catch { self.errorMessage = (error as NSError).localizedDescription }
     }
 }

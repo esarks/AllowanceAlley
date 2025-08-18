@@ -30,10 +30,13 @@ struct ChildFormView: View {
             Form {
                 Section("Basics") {
                     TextField("Child's name", text: $name)
-                    DatePicker("Birthdate",
-                               selection: Binding($birthdate, Date()),
-                               displayedComponents: .date)
+                    DatePicker(
+                        "Birthdate",
+                        selection: Binding<Date>(unwrapping: $birthdate, default: Date()),
+                        displayedComponents: .date
+                    )
                 }
+
                 Section("Avatar") {
                     HStack {
                         avatarPreview
@@ -44,14 +47,12 @@ struct ChildFormView: View {
                     }
                 }
             }
-            .navigationTitle(mode == .create ? "Add Child" : "Edit Child")
+            .navigationTitle(modeTitle)     // avoids Equatable on Mode
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        onSave(name.trimmingCharacters(in: .whitespaces),
-                               birthdate,
-                               imageData)
+                        onSave(name.trimmingCharacters(in: .whitespaces), birthdate, imageData)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
@@ -67,13 +68,16 @@ struct ChildFormView: View {
         }
     }
 
+    private var modeTitle: String {
+        switch mode { case .create: "Add Child"; case .edit: "Edit Child" }
+    }
+
     private var avatarPreview: some View {
         Group {
             if let data = imageData, let ui = UIImage(data: data) {
                 Image(uiImage: ui).resizable().scaledToFill()
             } else {
-                Image(systemName: "person.fill")
-                    .resizable().scaledToFit()
+                Image(systemName: "person.fill").resizable().scaledToFit()
                     .padding(16).foregroundStyle(.secondary)
                     .background(Color.secondary.opacity(0.15))
             }
@@ -83,9 +87,9 @@ struct ChildFormView: View {
     }
 }
 
-// Helper to bind optional Date in DatePicker
-extension Binding where Value == Date? {
-    init(_ source: Binding<Date?>, _ defaultValue: Date) {
+// ✅ Correct helper: produces Binding<Date> from Binding<Date?>
+private extension Binding where Value == Date {
+    init(unwrapping source: Binding<Date?>, default defaultValue: Date) {
         self.init(
             get: { source.wrappedValue ?? defaultValue },
             set: { newValue in source.wrappedValue = newValue }

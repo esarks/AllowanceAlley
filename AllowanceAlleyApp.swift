@@ -1,3 +1,4 @@
+// AllowanceAlleyApp.swift  (keep this one)
 import SwiftUI
 import Supabase
 
@@ -9,11 +10,9 @@ struct AllowanceAlleyApp: App {
         WindowGroup {
             Group {
                 if auth.isSignedIn {
-                    ChildrenListView()
-                        .environmentObject(auth)
+                    ChildrenListView().environmentObject(auth)
                 } else {
-                    EmailAuthView()
-                        .environmentObject(auth)
+                    EmailAuthView().environmentObject(auth)
                 }
             }
             .onOpenURL { url in
@@ -21,9 +20,7 @@ struct AllowanceAlleyApp: App {
                     do {
                         try await SupabaseManager.shared.client.auth.session(from: url)
                         auth.isSignedIn = true
-                    } catch {
-                        auth.errorMessage = (error as NSError).localizedDescription
-                    }
+                    } catch { auth.errorMessage = (error as NSError).localizedDescription }
                 }
             }
         }
