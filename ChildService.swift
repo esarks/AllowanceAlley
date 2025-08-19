@@ -16,16 +16,15 @@ final class ChildService: ObservableObject {
             .trimmingCharacters(in: .whitespacesAndNewlines) ?? "avatars"
     }
 
-    // Your SDK exposes user.id as UUID.
+    // supabase-swift user.id is UUID
     private func currentUserId() async throws -> UUID {
         let user = try await client.auth.user()
         return user.id
     }
 
-    // --- Optional: call this once (e.g., before first upload) to confirm the bucket exists.
-    // NOTE: supabase-swift uses an UNLABELED parameter for getBucket.
+    // Optional sanity check; parameter is UNLABELED in supabase-swift
     private func assertBucketExists() async throws {
-        _ = try await client.storage.getBucket(avatarsBucket) // ← no 'id:' label
+        _ = try await client.storage.getBucket(avatarsBucket)
     }
 
     // MARK: - READ
@@ -48,7 +47,7 @@ final class ChildService: ObservableObject {
         }
     }
 
-    // MARK: - CREATE
+    // MARK: - CREATE (insert first, then try avatar upload/update)
     func add(name: String, birthdate: Date?, avatarData: Data? = nil) async {
         errorMessage = nil
         isLoading = true
@@ -66,35 +65,48 @@ final class ChildService: ObservableObject {
             let uid = try await currentUserId()
             let id = UUID()
 
-            var avatarPath: String? = nil
-            if let data = avatarData {
-                // Verify bucket only when needed (avoids false failures when no photo)
-                try await assertBucketExists()
-
-                let path = "child/\(id.uuidString).jpg"
-                try await client.storage
-                    .from(avatarsBucket)
-                    .upload(
-                        path: path,
-                        file: data,
-                        options: FileOptions(contentType: "image/jpeg", upsert: true)
-                    )
-                avatarPath = path
-            }
-
-            let payload = NewChild(
+            // 1) Insert the child without blocking on avatar
+            let insertPayload = NewChild(
                 id: id,
                 parent_user_id: uid.uuidString,
                 name: name,
-                birthdate: birthdate.map { Child.dateOnly.string(from: $0) }, // "yyyy-MM-dd"
-                avatar_url: avatarPath
+                birthdate: birthdate.map { Child.dateOnly.string(from: $0) },
+                avatar_url: nil
             )
 
             let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .insert(payload)   // your SDK: no 'value:' label
+                .insert(insertPayload)
                 .select()
                 .execute()
+
+            // 2) If we have an avatar, attempt upload, then update row
+            if let data = avatarData {
+                do {
+                    try await assertBucketExists() // will throw if wrong name/project
+                    let path = "child/\(id.uuidString).jpg" // no leading slash
+
+                    try await client.storage
+                        .from(avatarsBucket)
+                        .upload(
+                            path: path,
+                            file: data,
+                            options: FileOptions(contentType: "image/jpeg", upsert: true)
+                        )
+
+                    // Update the just-created child with avatar_url
+                    struct UpdateChild: Encodable { let avatar_url: String? }
+                    let _: PostgrestResponse<[Child]> = try await client.database
+                        .from("children")
+                        .update(UpdateChild(avatar_url: path))
+                        .eq("id", value: id.uuidString)
+                        .select()
+                        .execute()
+                } catch {
+                    // Keep the child; just tell the user the photo failed
+                    self.errorMessage = "Saved child, but photo upload failed: \((error as NSError).localizedDescription)"
+                }
+            }
 
             await load()
         } catch {
@@ -123,7 +135,7 @@ final class ChildService: ObservableObject {
 
             let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .update(payload)                    // your SDK: no 'value:' label
+                .update(payload)
                 .eq("id", value: child.id.uuidString)
                 .select()
                 .execute()
@@ -135,7 +147,7 @@ final class ChildService: ObservableObject {
     }
 
     // MARK: - DELETE
-    func delete(_ id: UUID) async {           // ← matches call site: delete(svc.children[i].id)
+    func delete(_ id: UUID) async {
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
@@ -160,8 +172,8 @@ final class ChildService: ObservableObject {
 
         do {
             try await assertBucketExists()
-
             let path = "child/\(child.id.uuidString).jpg"
+
             try await client.storage
                 .from(avatarsBucket)
                 .upload(
@@ -178,7 +190,7 @@ final class ChildService: ObservableObject {
         }
     }
 
-    // Build a public URL to display an avatar
+    // Build a public URL for display
     func publicURL(for path: String) -> URL? {
         guard let base = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String else { return nil }
         return URL(string: "\(base)/storage/v1/object/public/\(avatarsBucket)/\(path)")
