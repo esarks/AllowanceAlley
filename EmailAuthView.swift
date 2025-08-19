@@ -1,29 +1,39 @@
 import SwiftUI
-import Supabase
 
-@main
-struct AllowanceAlleyApp: App {
-    @StateObject private var auth = AuthService()
+struct EmailAuthView: View {
+    @EnvironmentObject var auth: AuthService
 
-    var body: some Scene {
-        WindowGroup {
-            Group {
-                if auth.isSignedIn {
-                    ChildrenListView()
-                        .environmentObject(auth)
-                } else {
-                    EmailAuthView()
-                        .environmentObject(auth)
-                }
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Sign in").font(.title.bold())
+
+            TextField("Email", text: $auth.email)
+                .textContentType(.emailAddress)
+                .keyboardType(.emailAddress)
+                .autocapitalization(.none)
+                .textFieldStyle(.roundedBorder)
+
+            SecureField("Password", text: $auth.password)
+                .textFieldStyle(.roundedBorder)
+
+            HStack {
+                Button("Sign Up") { Task { await auth.signUp() } }
+                    .buttonStyle(.borderedProminent)
+                Button("Sign In") { Task { await auth.signIn() } }
+                    .buttonStyle(.bordered)
             }
-            .onOpenURL { url in
-                Task {
-                    do {
-                        try await SupabaseManager.shared.client.auth.session(from: url)
-                        auth.isSignedIn = true
-                    } catch { auth.errorMessage = (error as NSError).localizedDescription }
-                }
+
+            HStack {
+                TextField("Email code", text: $auth.code)
+                    .keyboardType(.numberPad)
+                    .textFieldStyle(.roundedBorder)
+                Button("Verify") { Task { await auth.verifyCode() } }
+            }
+
+            if let msg = auth.errorMessage {
+                Text(msg).foregroundStyle(.red)
             }
         }
+        .padding()
     }
 }

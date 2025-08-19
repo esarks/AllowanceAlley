@@ -1,6 +1,6 @@
 # Repository Manifest — AllowanceAlley
-- Commit: 2d6e44a7c639a9637d9b1f2172f721d36ea6c509
-- Generated: Mon Aug 18 23:50:10 UTC 2025
+- Commit: 35be611301ced574da0065414c857b0c67632516
+- Generated: Tue Aug 19 00:05:21 UTC 2025
 
 ## Tracked files
 
@@ -8,14 +8,14 @@
 |---|---:|---|
 | .DS_Store | 6148 | 4ecb494e9f4c37f6f3b6d0b0c1dd39432146c8b62729d13fb7c2373bc3c62810 |
 | .gitattributes | 66 | 1a1dbe176bc233b499d35a57db7513f2941c99ab9759f177830c9149be99005b |
-| AllowanceAlleyApp.swift | 858 | 19d76c71c58f675bdb8453bf6114024ef38d359d9494a75b9dcdc7142c1e6f24 |
+| AllowanceAlleyApp.swift | 808 | aa41afede9e2662e72fcdf705aac500176cedefe58a16f46f880e639cd99e66f |
 | Assets.xcassets/AccentColor.colorset/Contents.json | 123 | 9af65086fa30b49252fae1a1225731691de794f7775af74d71befeb507d12b7c |
 | Assets.xcassets/AppIcon.appiconset/Contents.json | 607 | d776cfae1b33325f70befa1b0fc5e5420c660655603409e8588d94fd8fc6e112 |
 | Assets.xcassets/Contents.json | 63 | 0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b |
 | AuthService.swift | 2704 | ab7585be2a0cd43043888b31fd6618978da8fbc75e5305e91069144dfaea99e6 |
 | Child.swift | 533 | 2dd0a8907d2b42ea89ecd394d6bf0c717e5b6a505db953116f8d8fb18bb2b433 |
-| ChildFormView.swift | 3235 | 9be53945d7a1ab8bcadebeff88e4b767387205892bd54f1e65e765adbfc2ad69 |
-| ChildService.swift | 4058 | 87d63b85ac8dd7b1b5efeb02e72dcc90a202a3c833b53e8a5a93676d00e77f7b |
+| ChildFormView.swift | 3385 | d40abbfeb38819da2b5eede8ac75e0d1ae81933a41d4a055aedbc80212539a9d |
+| ChildService.swift | 4250 | 9fa26c7731fbfb718dc777d9b1f6cb2457d109b92fd53f67bd5772578bbd4459 |
 | ChildrenListView.swift | 3186 | 7a54853f20e47f186c1dd4dd49dd1b275822b019f899f5deac2653f150184a5d |
 | Configure/Info.plist | 1341 | 005721ea2b11118766d815e2bec75ad0b4cf42c5a85b4e45ab1b2873de55075c |
 | ContentView.swift | 1599 | 243304dc61b07162963d45d5a7801adf726f2fd1ebeaa5b1acd8930e51960d50 |
@@ -24,4 +24,4 @@
 | Scripts/create_manifest.sh | 838 | dde6e5359b37015ced4a208a5ea444144f0de293d26dde4b22f3ee541a9a4383 |
 | Scripts/repo_manifest.txt | 399 | e681577110e5c4fad5aec3edfeeefbe1fd8ae373e4d34c7144a3526d4dfe176a |
 | SupabaseManager.swift | 1149 | d6e0ec03d6812165cfaf785db8a32b6a1738e2d9a057e41ccf9e9f39dc13cb8a |
-| repo_manifest.txt | 2016 | e698e7a2eb7987bb5f3cb4b8c0ad74476bfca617563e8eb0a75c13c05eb1376f |
+| repo_manifest.txt | 2016 | b70103ad9bae4c13c4bbb1901472f346cc088c2ab70a5838923026f153fc1907 |

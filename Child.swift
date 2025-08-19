@@ -1,22 +1,24 @@
 import Foundation
 
-struct Child: Identifiable, Codable, Equatable {
+struct Child: Codable, Identifiable, Equatable {
     var id: UUID
-    var parentUserId: UUID
+    var parentUserId: String
     var name: String
     var birthdate: Date?
-    var avatarURL: URL?
-
-    var age: Int? {
-        guard let b = birthdate else { return nil }
-        return Calendar.current.dateComponents([.year], from: b, to: Date()).year
-    }
+    var avatarUrl: String?
+    var createdAt: Date?
 
     enum CodingKeys: String, CodingKey {
         case id
         case parentUserId = "parent_user_id"
         case name
         case birthdate
-        case avatarURL = "avatar_url"
+        case avatarUrl = "avatar_url"
+        case createdAt = "created_at"
+    }
+
+    var age: Int? {
+        guard let b = birthdate else { return nil }
+        return Calendar.current.dateComponents([.year], from: b, to: Date()).year
     }
 }

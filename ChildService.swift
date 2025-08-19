@@ -10,52 +10,66 @@ final class ChildService: ObservableObject {
 
     private let client = SupabaseManager.shared.client
 
-    // MARK: - Current user id (user.id is already UUID in your SDK)
     private func currentUserId() async throws -> UUID {
         let user = try await client.auth.user()
-        return user.id   // <-- user.id is UUID (no string conversion)
+        guard let id = UUID(uuidString: user.id) else {
+            throw NSError(domain: "ChildService", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "Invalid user id"])
+        }
+        return id
     }
 
-    // MARK: - READ
+    // READ
     func load() async {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            isLoading = true; defer { isLoading = false }
             let uid = try await currentUserId()
-            let rows: [Child] = try await client.database
+            let resp: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
                 .select()
-                .eq("parent_user_id", uid.uuidString)   // pass as String to PostgREST
+                .eq("parent_user_id", value: uid.uuidString)
                 .order("created_at", ascending: true)
                 .execute()
-                .decoded()
-            self.children = rows
+
+            self.children = resp.value
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
         }
     }
 
-    // MARK: - CREATE
-    func add(name: String, birthdate: Date?) async {
-        struct NewChild: Encodable {
-            let parent_user_id: String
-            let name: String
-            let birthdate: String?
-        }
+    // CREATE
+    func add(name: String, birthdate: Date?, avatarData: Data?) async {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            isLoading = true; defer { isLoading = false }
             let uid = try await currentUserId()
-            let iso = ISO8601DateFormatter()
-
-            let payload = NewChild(
-                parent_user_id: uid.uuidString,
+            var newChild = Child(
+                id: UUID(),
+                parentUserId: uid.uuidString,
                 name: name,
-                birthdate: birthdate.map { iso.string(from: $0) }
+                birthdate: birthdate,
+                avatarUrl: nil,
+                createdAt: Date()
             )
 
-            // Your package wants `value:` here
-            try await client.database
+            if let data = avatarData {
+                let path = "avatars/\(newChild.id.uuidString).jpg"
+                try await client.storage
+                    .from("avatars")
+                    .upload(path: path, file: data,
+                            options: FileOptions(contentType: "image/jpeg", upsert: true))
+                newChild.avatarUrl = path
+            }
+
+            let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .insert(value: payload)
+                .insert(newChild)
+                .select()
                 .execute()
 
             await load()
@@ -64,27 +78,18 @@ final class ChildService: ObservableObject {
         }
     }
 
-    // MARK: - UPDATE
-    func update(child: Child) async {
-        // send a DB-friendly payload (URL -> String, Date -> ISO string)
-        struct UpdateChild: Encodable {
-            let name: String
-            let birthdate: String?
-            let avatar_url: String?
-        }
+    // UPDATE
+    func update(_ child: Child) async {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            isLoading = true; defer { isLoading = false }
-            let iso = ISO8601DateFormatter()
-            let payload = UpdateChild(
-                name: child.name,
-                birthdate: child.birthdate.map { iso.string(from: $0) },
-                avatar_url: child.avatarURL?.absoluteString
-            )
-
-            try await client.database
+            let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .update(value: payload)                     // <-- `value:` label
-                .eq("id", child.id.uuidString)
+                .update(child)
+                .eq("id", value: child.id.uuidString)
+                .select()
                 .execute()
 
             await load()
@@ -93,36 +98,20 @@ final class ChildService: ObservableObject {
         }
     }
 
-    // MARK: - DELETE
+    // DELETE
     func delete(id: UUID) async {
+        errorMessage = nil
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            isLoading = true; defer { isLoading = false }
-            try await client.database
+            let _: PostgrestResponse<Void> = try await client.database
                 .from("children")
                 .delete()
-                .eq("id", id.uuidString)
+                .eq("id", value: id.uuidString)
                 .execute()
-            children.removeAll { $0.id == id }
-        } catch {
-            self.errorMessage = (error as NSError).localizedDescription
-        }
-    }
 
-    // MARK: - AVATAR (requires public 'avatars' bucket)
-    func uploadAvatar(for child: Child, imageData: Data) async {
-        do {
-            isLoading = true; defer { isLoading = false }
-            let path = "child/\(child.id.uuidString).jpg"
-
-            try await client.storage
-                .from("avatars")
-                .upload(path: path, file: imageData,
-                        options: FileOptions(cacheControl: "3600", upsert: true))
-
-            let url = try client.storage.from("avatars").getPublicURL(path: path)
-            var updated = child
-            updated.avatarURL = URL(string: url)
-            await update(child: updated)
+            await load()
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
         }

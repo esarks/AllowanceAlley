@@ -30,14 +30,12 @@ struct ChildFormView: View {
             Form {
                 Section("Basics") {
                     TextField("Child's name", text: $name)
-
                     DatePicker(
                         "Birthdate",
                         selection: Binding<Date>(unwrapping: $birthdate, default: Date()),
                         displayedComponents: .date
                     )
                 }
-
                 Section("Avatar") {
                     HStack {
                         avatarPreview
@@ -50,9 +48,7 @@ struct ChildFormView: View {
             }
             .navigationTitle(modeTitle)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         onSave(name.trimmingCharacters(in: .whitespacesAndNewlines), birthdate, imageData)
@@ -64,7 +60,7 @@ struct ChildFormView: View {
             .onChange(of: pickerItem) { _ in
                 Task {
                     if let data = try? await pickerItem?.loadTransferable(type: Data.self) {
-                        imageData = data
+                        self.imageData = data
                     }
                 }
             }
@@ -80,7 +76,8 @@ struct ChildFormView: View {
             if let data = imageData, let ui = UIImage(data: data) {
                 Image(uiImage: ui).resizable().scaledToFill()
             } else {
-                Image(systemName: "person.fill").resizable().scaledToFit()
+                Image(systemName: "person.fill")
+                    .resizable().scaledToFit()
                     .padding(16).foregroundStyle(.secondary)
                     .background(Color.secondary.opacity(0.15))
             }
@@ -90,7 +87,6 @@ struct ChildFormView: View {
     }
 }
 
-// Helper: make a Binding<Date> from a Binding<Date?>
 private extension Binding where Value == Date {
     init(unwrapping source: Binding<Date?>, default defaultValue: Date) {
         self.init(
