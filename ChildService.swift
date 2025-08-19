@@ -22,10 +22,10 @@ final class ChildService: ObservableObject {
         return user.id
     }
 
-    // Confirm the bucket exists (anon key can read metadata).
-    // Throws if the bucket name is wrong or not present in this project.
+    // --- Optional: call this once (e.g., before first upload) to confirm the bucket exists.
+    // NOTE: supabase-swift uses an UNLABELED parameter for getBucket.
     private func assertBucketExists() async throws {
-        _ = try await client.storage.getBucket(id: avatarsBucket)
+        _ = try await client.storage.getBucket(avatarsBucket) // ← no 'id:' label
     }
 
     // MARK: - READ
@@ -68,7 +68,7 @@ final class ChildService: ObservableObject {
 
             var avatarPath: String? = nil
             if let data = avatarData {
-                // Verify bucket only when we actually need it
+                // Verify bucket only when needed (avoids false failures when no photo)
                 try await assertBucketExists()
 
                 let path = "child/\(id.uuidString).jpg"
@@ -135,7 +135,7 @@ final class ChildService: ObservableObject {
     }
 
     // MARK: - DELETE
-    func delete(_ id: UUID) async {           // ← no external 'id:' label
+    func delete(_ id: UUID) async {           // ← matches call site: delete(svc.children[i].id)
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
