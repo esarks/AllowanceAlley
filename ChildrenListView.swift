@@ -10,7 +10,10 @@ struct ChildrenListView: View {
         NavigationStack {
             List {
                 ForEach(svc.children) { child in
-                    Button { editing = child } label: {
+                    Button {
+                        editing = child
+                        showingAdd = true
+                    } label: {
                         HStack(spacing: 12) {
                             avatar(for: child)
                             VStack(alignment: .leading, spacing: 2) {
@@ -19,82 +22,99 @@ struct ChildrenListView: View {
                                     Text("\(age) yrs").foregroundStyle(.secondary)
                                 }
                             }
-                            Spacer()
                         }
                     }
-                    .buttonStyle(.plain)
                 }
-                .onDelete { idx in
+                .onDelete { indexSet in
                     Task {
-                        for i in idx { await svc.delete(svc.children[i].id) } // ← no 'id:' label
+                        for idx in indexSet {
+                            await svc.delete(id: svc.children[idx].id)
+                        }
                     }
                 }
+            }
+            .overlay {
+                if svc.isLoading { ProgressView() }
             }
             .navigationTitle("Children")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button { showingAdd = true } label: { Image(systemName: "plus") }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        editing = nil
+                        showingAdd = true
+                    } label: { Image(systemName: "plus") }
                 }
             }
+            .task { await svc.load() }
             .sheet(isPresented: $showingAdd) {
-                ChildFormView(mode: .create) { name, birthdate, data in
-                    Task { await svc.add(name: name, birthdate: birthdate, avatarData: data) }
-                }
-            }
-            .sheet(item: $editing) { kid in
-                ChildFormView(mode: .edit(existing: kid)) { name, birthdate, data in
-                    Task {
-                        var updated = kid
-                        updated.name = name
-                        updated.birthdate = birthdate
-                        if let data = data {
-                            await svc.uploadAvatar(for: updated, imageData: data)
-                        } else {
-                            await svc.update(updated)
+                ChildFormView(
+                    mode: editing == nil ? .create : .edit(existing: editing!),
+                    onSave: { name, birth, avatarData in
+                        Task {
+                            if let child = editing {
+                                var updated = child
+                                updated.name = name
+                                updated.birthdate = birth
+                                if let data = avatarData {
+                                    await svc.uploadAvatar(for: updated, imageData: data)
+                                } else {
+                                    await svc.update(updated)
+                                }
+                            } else {
+                                await svc.add(name: name, birthdate: birth, avatarData: avatarData)
+                            }
                         }
                     }
-                }
+                )
             }
-            .overlay { if svc.isLoading { ProgressView() } }
-            .task { await svc.load() }
-            .alert("Error",
-                   isPresented: Binding(get: { svc.errorMessage != nil },
-                                        set: { _ in svc.errorMessage = nil })) {
-                Button("OK", role: .cancel) {}
-            } message: { Text(svc.errorMessage ?? "") }
+        }
+        .environmentObject(auth)
+        .alert(item: Binding(
+            get: { svc.errorMessage.map { LocalizedErrorBox(message: $0) } },
+            set: { _ in svc.errorMessage = nil })
+        ) { box in
+            Alert(title: Text("Error"), message: Text(box.message), dismissButton: .default(Text("OK")))
         }
     }
 
-    @ViewBuilder
-    private func avatar(for child: Child) -> some View {
-        let placeholder = Color.secondary.opacity(0.15)
+    // MARK: - Small helpers
 
-        if let path = child.avatarUrl,
-           let url = svc.publicURL(for: path) {
-            if #available(iOS 15.0, *) {
-                AsyncImage(url: url) { img in
-                    img.resizable().scaledToFill()
-                        .frame(width: 44, height: 44)     // ← modifiers INSIDE the branch
-                        .clipShape(Circle())
-                } placeholder: {
-                    placeholder
-                        .frame(width: 44, height: 44)
-                        .clipShape(Circle())
+    private func avatar(for child: Child) -> some View {
+        Group {
+            if let path = child.avatarUrl,
+               let url = ChildService().publicURL(for: path) {
+                if #available(iOS 15.0, *) {
+                    AsyncImage(url: url) { phase in
+                        switch phase {
+                        case .empty:
+                            Color.secondary.opacity(0.15)
+                        case .failure:
+                            Color.secondary.opacity(0.15)
+                        case .success(let img):
+                            img.resizable().scaledToFill()
+                        @unknown default:
+                            Color.secondary.opacity(0.15)
+                        }
+                    }
+                } else {
+                    Color.secondary.opacity(0.15)
                 }
             } else {
-                placeholder
-                    .frame(width: 44, height: 44)
-                    .clipShape(Circle())
+                Color.secondary.opacity(0.15)
             }
-        } else {
-            placeholder
-                .frame(width: 44, height: 44)
-                .clipShape(Circle())
         }
+        .frame(width: 44, height: 44)
+        .clipShape(Circle())
     }
 
-    private func computedAge(from birthdate: Date?) -> Int? {
-        guard let b = birthdate else { return nil }
-        return Calendar.current.dateComponents([.year], from: b, to: Date()).year
+    private func computedAge(from date: Date?) -> Int? {
+        guard let d = date else { return nil }
+        let years = Calendar.current.dateComponents([.year], from: d, to: Date()).year
+        return years
     }
+}
+
+private struct LocalizedErrorBox: Identifiable {
+    let id = UUID()
+    let message: String
 }

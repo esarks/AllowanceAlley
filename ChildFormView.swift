@@ -11,14 +11,16 @@ struct ChildFormView: View {
     @State private var name = ""
     @State private var birthdate: Date?
     @State private var pickerItem: PhotosPickerItem?
-    @State private var imageData: Data?
+    @State private var avatarData: Data?
 
     init(mode: Mode,
-         onSave: @escaping (_ name: String, _ birthdate: Date?, _ avatarData: Data?) -> Void) {
+         onSave: @escaping (_ name: String, _ birthdate: Date?, _ avatarData: Data?) -> Void)
+    {
         self.mode = mode
         self.onSave = onSave
         switch mode {
-        case .create: break
+        case .create:
+            break
         case .edit(let c):
             _name = State(initialValue: c.name)
             _birthdate = State(initialValue: c.birthdate)
@@ -29,65 +31,77 @@ struct ChildFormView: View {
         NavigationStack {
             Form {
                 Section("Basics") {
-                    TextField("Child's name", text: $name)
+                    TextField("Name", text: $name)
                     DatePicker(
                         "Birthdate",
-                        selection: Binding<Date>(unwrapping: $birthdate, default: Date()),
+                        selection: Binding(unwrapping: $birthdate, default: Date()),
                         displayedComponents: .date
                     )
                 }
+
                 Section("Avatar") {
-                    HStack {
+                    HStack(spacing: 16) {
                         avatarPreview
-                        Spacer()
-                        PhotosPicker(selection: $pickerItem, matching: .images) {
-                            Text("Choose Photo")
-                        }
+                            .frame(width: 56, height: 56)
+                            .clipShape(Circle())
+                        PhotosPicker(
+                            selection: $pickerItem,
+                            matching: .images,
+                            photoLibrary: .shared()) {
+                                Text("Choose Photo")
+                            }
                     }
                 }
             }
             .navigationTitle(modeTitle)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Save") {
-                        onSave(name.trimmingCharacters(in: .whitespacesAndNewlines), birthdate, imageData)
+                        onSave(name, birthdate, avatarData)
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .onChange(of: pickerItem) { _ in
-                Task {
-                    if let data = try? await pickerItem?.loadTransferable(type: Data.self) {
-                        self.imageData = data
-                    }
-                }
+            .onChange(of: pickerItem) { newItem in
+                Task { await loadJPEG(from: newItem) }
             }
         }
     }
+
+    // MARK: UI bits
 
     private var modeTitle: String {
         switch mode { case .create: "Add Child"; case .edit: "Edit Child" }
     }
 
-    private var avatarPreview: some View {
-        Group {
-            if let data = imageData, let ui = UIImage(data: data) {
-                Image(uiImage: ui).resizable().scaledToFill()
-            } else {
-                Image(systemName: "person.fill")
-                    .resizable().scaledToFit()
-                    .padding(16).foregroundStyle(.secondary)
-                    .background(Color.secondary.opacity(0.15))
-            }
+    @ViewBuilder private var avatarPreview: some View {
+        if let data = avatarData, let ui = UIImage(data: data) {
+            Image(uiImage: ui).resizable().scaledToFill()
+        } else {
+            Color.secondary.opacity(0.15)
         }
-        .frame(width: 64, height: 64)
-        .clipShape(Circle())
+    }
+
+    // MARK: Image loader
+
+    private func loadJPEG(from item: PhotosPickerItem?) async {
+        guard let data = try? await item?.loadTransferable(type: Data.self) else { return }
+        // Normalize to jpeg to keep contentType stable
+        if let img = UIImage(data: data),
+           let jpeg = img.jpegData(compressionQuality: 0.9) {
+            self.avatarData = jpeg
+        } else {
+            self.avatarData = data // fallback
+        }
     }
 }
 
-private extension Binding where Value == Date {
+// Small Binding helper to allow optional Date selection
+private extension Binding where Value == Date? {
     init(unwrapping source: Binding<Date?>, default defaultValue: Date) {
         self.init(
             get: { source.wrappedValue ?? defaultValue },
