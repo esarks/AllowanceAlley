@@ -30,6 +30,7 @@ struct ChildFormView: View {
             Form {
                 Section("Basics") {
                     TextField("Child's name", text: $name)
+
                     DatePicker(
                         "Birthdate",
                         selection: Binding<Date>(unwrapping: $birthdate, default: Date()),
@@ -47,15 +48,17 @@ struct ChildFormView: View {
                     }
                 }
             }
-            .navigationTitle(modeTitle)     // avoids Equatable on Mode
+            .navigationTitle(modeTitle)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        onSave(name.trimmingCharacters(in: .whitespaces), birthdate, imageData)
+                        onSave(name.trimmingCharacters(in: .whitespacesAndNewlines), birthdate, imageData)
                         dismiss()
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             .onChange(of: pickerItem) { _ in
@@ -87,7 +90,7 @@ struct ChildFormView: View {
     }
 }
 
-// ✅ Correct helper: produces Binding<Date> from Binding<Date?>
+// Helper: make a Binding<Date> from a Binding<Date?>
 private extension Binding where Value == Date {
     init(unwrapping source: Binding<Date?>, default defaultValue: Date) {
         self.init(
