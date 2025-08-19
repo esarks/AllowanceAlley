@@ -10,9 +10,7 @@ struct ChildrenListView: View {
         NavigationStack {
             List {
                 ForEach(svc.children) { child in
-                    Button {
-                        editing = child
-                    } label: {
+                    Button { editing = child } label: {
                         HStack(spacing: 12) {
                             avatar(for: child)
                             VStack(alignment: .leading, spacing: 2) {
@@ -28,7 +26,7 @@ struct ChildrenListView: View {
                 }
                 .onDelete { idx in
                     Task {
-                        for i in idx { await svc.delete(id: svc.children[i].id) }
+                        for i in idx { await svc.delete(svc.children[i].id) } // ← no 'id:' label
                     }
                 }
             }
@@ -50,34 +48,49 @@ struct ChildrenListView: View {
                         updated.name = name
                         updated.birthdate = birthdate
                         if let data = data {
-                            // optional: upload avatar via service's add/upload path if desired
+                            await svc.uploadAvatar(for: updated, imageData: data)
+                        } else {
+                            await svc.update(updated)
                         }
-                        await svc.update(updated)
                     }
                 }
             }
             .overlay { if svc.isLoading { ProgressView() } }
             .task { await svc.load() }
-            .alert("Error", isPresented: Binding(get: { svc.errorMessage != nil },
-                                                 set: { _ in svc.errorMessage = nil })) {
+            .alert("Error",
+                   isPresented: Binding(get: { svc.errorMessage != nil },
+                                        set: { _ in svc.errorMessage = nil })) {
                 Button("OK", role: .cancel) {}
             } message: { Text(svc.errorMessage ?? "") }
         }
     }
 
+    @ViewBuilder
     private func avatar(for child: Child) -> some View {
-        Group {
-            if let path = child.avatarUrl, let url = URL(string: path),
-               #available(iOS 15.0, *) {
-                AsyncImage(url: url) { img in img.resizable().scaledToFill() } placeholder: {
-                    Color.secondary.opacity(0.15)
+        let placeholder = Color.secondary.opacity(0.15)
+
+        if let path = child.avatarUrl,
+           let url = svc.publicURL(for: path) {
+            if #available(iOS 15.0, *) {
+                AsyncImage(url: url) { img in
+                    img.resizable().scaledToFill()
+                        .frame(width: 44, height: 44)     // ← modifiers INSIDE the branch
+                        .clipShape(Circle())
+                } placeholder: {
+                    placeholder
+                        .frame(width: 44, height: 44)
+                        .clipShape(Circle())
                 }
             } else {
-                Color.secondary.opacity(0.15)
+                placeholder
+                    .frame(width: 44, height: 44)
+                    .clipShape(Circle())
             }
+        } else {
+            placeholder
+                .frame(width: 44, height: 44)
+                .clipShape(Circle())
         }
-        .frame(width: 44, height: 44)
-        .clipShape(Circle())
     }
 
     private func computedAge(from birthdate: Date?) -> Int? {

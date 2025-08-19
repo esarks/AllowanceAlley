@@ -9,12 +9,23 @@ final class ChildService: ObservableObject {
     @Published var errorMessage: String?
 
     private let client = SupabaseManager.shared.client
-    private let avatarsBucket = "avatars"
 
-    // Your installed SDK exposes user.id as UUID – return it directly.
+    // Read from Info.plist; fallback to "avatars"
+    private var avatarsBucket: String {
+        (Bundle.main.object(forInfoDictionaryKey: "AVATAR_BUCKET") as? String)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? "avatars"
+    }
+
+    // Your SDK exposes user.id as UUID.
     private func currentUserId() async throws -> UUID {
         let user = try await client.auth.user()
         return user.id
+    }
+
+    // Confirm the bucket exists (anon key can read metadata).
+    // Throws if the bucket name is wrong or not present in this project.
+    private func assertBucketExists() async throws {
+        _ = try await client.storage.getBucket(id: avatarsBucket)
     }
 
     // MARK: - READ
@@ -25,15 +36,12 @@ final class ChildService: ObservableObject {
 
         do {
             let uid = try await currentUserId()
-
-            // Make the generic concrete so we can read .value directly.
             let resp: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
                 .select()
-                .eq("parent_user_id", value: uid.uuidString) // PostgREST expects String
+                .eq("parent_user_id", value: uid.uuidString)
                 .order("created_at", ascending: true)
                 .execute()
-
             self.children = resp.value
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
@@ -58,9 +66,11 @@ final class ChildService: ObservableObject {
             let uid = try await currentUserId()
             let id = UUID()
 
-            // Optional avatar upload to a public bucket
             var avatarPath: String? = nil
             if let data = avatarData {
+                // Verify bucket only when we actually need it
+                try await assertBucketExists()
+
                 let path = "child/\(id.uuidString).jpg"
                 try await client.storage
                     .from(avatarsBucket)
@@ -80,10 +90,9 @@ final class ChildService: ObservableObject {
                 avatar_url: avatarPath
             )
 
-            // Insert row; select() returns the inserted row typed as [Child]
             let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .insert(value: payload)  // your SDK expects the 'value:' label
+                .insert(payload)   // your SDK: no 'value:' label
                 .select()
                 .execute()
 
@@ -114,7 +123,7 @@ final class ChildService: ObservableObject {
 
             let _: PostgrestResponse<[Child]> = try await client.database
                 .from("children")
-                .update(value: payload) // 'value:' label required by your package
+                .update(payload)                    // your SDK: no 'value:' label
                 .eq("id", value: child.id.uuidString)
                 .select()
                 .execute()
@@ -126,7 +135,7 @@ final class ChildService: ObservableObject {
     }
 
     // MARK: - DELETE
-    func delete(id: UUID) async {
+    func delete(_ id: UUID) async {           // ← no external 'id:' label
         errorMessage = nil
         isLoading = true
         defer { isLoading = false }
@@ -137,7 +146,6 @@ final class ChildService: ObservableObject {
                 .delete()
                 .eq("id", value: id.uuidString)
                 .execute()
-
             await load()
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
@@ -151,6 +159,8 @@ final class ChildService: ObservableObject {
         defer { isLoading = false }
 
         do {
+            try await assertBucketExists()
+
             let path = "child/\(child.id.uuidString).jpg"
             try await client.storage
                 .from(avatarsBucket)
@@ -166,5 +176,11 @@ final class ChildService: ObservableObject {
         } catch {
             self.errorMessage = (error as NSError).localizedDescription
         }
+    }
+
+    // Build a public URL to display an avatar
+    func publicURL(for path: String) -> URL? {
+        guard let base = Bundle.main.object(forInfoDictionaryKey: "SUPABASE_URL") as? String else { return nil }
+        return URL(string: "\(base)/storage/v1/object/public/\(avatarsBucket)/\(path)")
     }
 }
