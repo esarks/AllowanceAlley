@@ -5,26 +5,41 @@ struct ChildFormView: View {
     enum Mode { case create, edit(existing: Child) }
 
     let mode: Mode
+    /// Called when the user taps Save.
+    /// Passes: name, optional birthdate, optional avatar image data (JPEG/PNG)
     var onSave: (_ name: String, _ birthdate: Date?, _ avatarData: Data?) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var birthdate: Date?
+
+    @State private var name: String = ""
+    @State private var birthdate: Date? = nil
     @State private var pickerItem: PhotosPickerItem?
     @State private var avatarData: Data?
 
-    init(mode: Mode,
-         onSave: @escaping (_ name: String, _ birthdate: Date?, _ avatarData: Data?) -> Void)
-    {
+    // MARK: - Init seeds state for edit mode
+    init(
+        mode: Mode,
+        onSave: @escaping (_ name: String, _ birthdate: Date?, _ avatarData: Data?) -> Void
+    ) {
         self.mode = mode
         self.onSave = onSave
+
         switch mode {
         case .create:
-            break
-        case .edit(let c):
-            _name = State(initialValue: c.name)
-            _birthdate = State(initialValue: c.birthdate)
+            _name = State(initialValue: "")
+            _birthdate = State(initialValue: nil)
+        case .edit(let existing):
+            _name = State(initialValue: existing.name)
+            _birthdate = State(initialValue: existing.birthdate)
         }
+    }
+
+    // Convert our optional Date state into a non-optional Binding for DatePicker
+    private var birthdateBinding: Binding<Date> {
+        Binding<Date>(
+            get: { birthdate ?? Date() },
+            set: { birthdate = $0 }
+        )
     }
 
     var body: some View {
@@ -32,24 +47,20 @@ struct ChildFormView: View {
             Form {
                 Section("Basics") {
                     TextField("Name", text: $name)
-                    DatePicker(
-                        "Birthdate",
-                        selection: Binding(unwrapping: $birthdate, default: Date()),
-                        displayedComponents: .date
-                    )
+                    DatePicker("Birthdate",
+                               selection: birthdateBinding,
+                               displayedComponents: .date)
                 }
 
                 Section("Avatar") {
-                    HStack(spacing: 16) {
-                        avatarPreview
-                            .frame(width: 56, height: 56)
-                            .clipShape(Circle())
-                        PhotosPicker(
-                            selection: $pickerItem,
-                            matching: .images,
-                            photoLibrary: .shared()) {
-                                Text("Choose Photo")
-                            }
+                    avatarPreview
+                        .frame(width: 56, height: 56)
+                        .clipShape(Circle())
+
+                    PhotosPicker(selection: $pickerItem,
+                                 matching: .images,
+                                 photoLibrary: .shared()) {
+                        Text("Choose Photo")
                     }
                 }
             }
@@ -66,19 +77,24 @@ struct ChildFormView: View {
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
-            .onChange(of: pickerItem) { newItem in
-                Task { await loadJPEG(from: newItem) }
+            // iOS 17+ preferred signature
+            .onChange(of: pickerItem) { _, newItem in
+                Task { await loadImageData(from: newItem) }
             }
         }
     }
 
-    // MARK: UI bits
+    // MARK: - Helpers
 
     private var modeTitle: String {
-        switch mode { case .create: "Add Child"; case .edit: "Edit Child" }
+        switch mode {
+        case .create: return "Add Child"
+        case .edit:   return "Edit Child"
+        }
     }
 
-    @ViewBuilder private var avatarPreview: some View {
+    @ViewBuilder
+    private var avatarPreview: some View {
         if let data = avatarData, let ui = UIImage(data: data) {
             Image(uiImage: ui).resizable().scaledToFill()
         } else {
@@ -86,26 +102,15 @@ struct ChildFormView: View {
         }
     }
 
-    // MARK: Image loader
-
-    private func loadJPEG(from item: PhotosPickerItem?) async {
-        guard let data = try? await item?.loadTransferable(type: Data.self) else { return }
-        // Normalize to jpeg to keep contentType stable
-        if let img = UIImage(data: data),
-           let jpeg = img.jpegData(compressionQuality: 0.9) {
-            self.avatarData = jpeg
-        } else {
-            self.avatarData = data // fallback
+    private func loadImageData(from item: PhotosPickerItem?) async {
+        guard let item else { return }
+        do {
+            if let data = try await item.loadTransferable(type: Data.self) {
+                self.avatarData = data
+            }
+        } catch {
+            // keep silent; preview just stays placeholder
+            print("PhotosPicker load error:", error.localizedDescription)
         }
-    }
-}
-
-// Small Binding helper to allow optional Date selection
-private extension Binding where Value == Date? {
-    init(unwrapping source: Binding<Date?>, default defaultValue: Date) {
-        self.init(
-            get: { source.wrappedValue ?? defaultValue },
-            set: { newValue in source.wrappedValue = newValue }
-        )
     }
 }
