@@ -1,6 +1,6 @@
 # Repository Manifest — AllowanceAlley
-- Commit: 29c13dcaca2cbbd03891adbb4738529e0ff1bcb8
-- Generated: Wed Aug 20 00:18:26 UTC 2025
+- Commit: a9d4270cfb0e68f7afe86306271959454a3d8415
+- Generated: Wed Aug 20 00:18:42 UTC 2025
 
 ## Tracked files
 
@@ -27,4 +27,4 @@
 | Scripts/create_manifest.sh | 838 | dde6e5359b37015ced4a208a5ea444144f0de293d26dde4b22f3ee541a9a4383 |
 | Scripts/repo_manifest.txt | 399 | e681577110e5c4fad5aec3edfeeefbe1fd8ae373e4d34c7144a3526d4dfe176a |
 | SupabaseManager.swift | 1149 | d6e0ec03d6812165cfaf785db8a32b6a1738e2d9a057e41ccf9e9f39dc13cb8a |
-| repo_manifest.txt | 2305 | aca0077981911ac3f5a90e2bcd1fc3d7448291710454d4e0c0fe3f804d329ed7 |
+| repo_manifest.txt | 2305 | 62a33783ffbcb71d82b55df3a8baf8c841daef4ce01bfe672233d4530fedf1c8 |
