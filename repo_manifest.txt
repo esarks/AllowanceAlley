@@ -1,6 +1,6 @@
 # Repository Manifest — AllowanceAlley
-- Commit: 469d23544033f2a8bbc6b7239898c28fa566a03e
-- Generated: Tue Aug 19 22:49:07 UTC 2025
+- Commit: 29c13dcaca2cbbd03891adbb4738529e0ff1bcb8
+- Generated: Wed Aug 20 00:18:26 UTC 2025
 
 ## Tracked files
 
@@ -15,10 +15,10 @@
 | AuthService.swift | 2704 | ab7585be2a0cd43043888b31fd6618978da8fbc75e5305e91069144dfaea99e6 |
 | Child.swift | 2799 | 55fd70d902c6bd1727342a0e8325c0a163be4b7a21b63a911be4ec2f94aefc1f |
 | ChildFormView.swift | 3709 | 19e558ff6021feedda055dee25c00d17fc965560b71181a0f65207a08781be9a |
-| ChildService.swift | 1392 | 965c9b5aafad47c21298acaddebcc532f7db5d38d474b79c53d0c1b606fd094a |
+| ChildService.swift | 6220 | 6b06dd36111bfae0d0f4b4401391af219393a8fd31e332d3cb51aa721de10016 |
 | ChildrenListView.swift | 4426 | deae69b900ab7b29b5f3fea429c49f6249bc4fc5825512327a46ab853e77a8c8 |
-| Chore.swift | 906 | d8daec730b322e896852b60cf5eb1ba807bd298aed098bd26a03f7547b4fe6f0 |
-| ChoreService.swift | 1433 | d6438cac6e064152ea1fab2d8ae34d52b60f12595a7550e77348a87ab4c760d6 |
+| Chore.swift | 1219 | 926d6b1865a9322f693644deed3b6faab9a7026be9d2f5afe8c4e2c3aed435e5 |
+| ChoreService.swift | 4571 | a5ecc754ef1716077a6dc826f253c087412d8ffcb40b6b2172996eca2e6c7241 |
 | Configure/Info.plist | 1399 | 496a7cd28a066704cfa57bec4f368ff7928a9b8cdb98262995a019bb99891cdb |
 | ContentView.swift | 1599 | 243304dc61b07162963d45d5a7801adf726f2fd1ebeaa5b1acd8930e51960d50 |
 | EmailAuthView.swift | 1210 | c7a21e6fc01c4ed0f0f77cb72678323f54c713aeaeca3eef3f1d774a8ef43f14 |
@@ -27,4 +27,4 @@
 | Scripts/create_manifest.sh | 838 | dde6e5359b37015ced4a208a5ea444144f0de293d26dde4b22f3ee541a9a4383 |
 | Scripts/repo_manifest.txt | 399 | e681577110e5c4fad5aec3edfeeefbe1fd8ae373e4d34c7144a3526d4dfe176a |
 | SupabaseManager.swift | 1149 | d6e0ec03d6812165cfaf785db8a32b6a1738e2d9a057e41ccf9e9f39dc13cb8a |
-| repo_manifest.txt | 2304 | f3f679fae4866ddebb2719db5a587d7fcf85156f10fd9e33fc2c51b6a6a18ff0 |
+| repo_manifest.txt | 2305 | aca0077981911ac3f5a90e2bcd1fc3d7448291710454d4e0c0fe3f804d329ed7 |
